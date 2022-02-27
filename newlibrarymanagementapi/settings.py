@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'categories',
     'books',
     'authentication',
+    'students',
 ]
 
 MIDDLEWARE = [
