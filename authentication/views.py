@@ -1,4 +1,5 @@
 from rest_framework import status
+from students.models import Student
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
@@ -17,6 +18,14 @@ class RegisterAPIView(APIView):
             )
             user.set_password(request.data.get('password'))
             user.save()
+            
+            student= Student.objects.create(
+                user= user,
+                first_name= user.first_name,
+                last_name= user.last_name
+            )
+            student.save()
+
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
