@@ -3,6 +3,6 @@ from categories.views import AddCategoryAPIView,ViewCategoriesAPIView,EditCatego
 
 urlpatterns= [
     path('category/add/',AddCategoryAPIView.as_view(),name='add-category'),
-    path('category/view/',ViewCategoriesAPIView.as_view(),name='view-category'),
+    path('categories/view/',ViewCategoriesAPIView.as_view(),name='view-categories'),
     path('category/edit/<int:pk>/',EditCategoriesAPIView.as_view(),name='edit-category'),
 ]
