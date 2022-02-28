@@ -1,4 +1,5 @@
 from books.models import Book
+from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from books.serializers import BookSerializer
@@ -13,13 +14,25 @@ class AddBookAPIView(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+class ViewBookAPIView(APIView):
+    def get_object(self,pk):
+        try:
+            return Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise Http404
+    
+    def get(self,request,pk):
+        book= self.get_object(pk)
+        serializer= BookSerializer(book)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
 class ViewBooksAPIView(APIView):
     def get(self,request):
         categories= Book.objects.all()
         serializer= BookSerializer(categories,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class EditBooksAPIView(APIView):
+class EditBookAPIView(APIView):
     def get_object(self,pk):
         try:
             return Book.objects.get(pk=pk)

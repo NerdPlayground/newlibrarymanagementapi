@@ -9,4 +9,4 @@ class UpdateSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model= Student
-        fields= ["first_name","last_name","registration_number","campus","faculty","course","mode_of_study"]
+        fields= ["id","first_name","last_name","registration_number","campus","faculty","course","mode_of_study"]

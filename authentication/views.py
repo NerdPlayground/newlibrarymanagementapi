@@ -1,9 +1,11 @@
+from django.http import Http404
 from rest_framework import status
 from students.models import Student
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.decorators import APIView
+from rest_framework.permissions import IsAuthenticated
 from authentication.serializers import RegisterSerializer,LoginSerializer,UserSerializer
 
 class RegisterAPIView(APIView):
@@ -45,3 +47,17 @@ class UserAPIView(APIView):
         users= User.objects.all()
         serializer= UserSerializer(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class DeleteAPIView(APIView):
+    permission_classes= [IsAuthenticated]
+    
+    def get_object(self,pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+    
+    def delete(self,request,pk):
+        student= self.get_object(pk)
+        student.delete()
+        return Response({"Information":"Student Account Successfully Deleted."},status=status.HTTP_204_NO_CONTENT)
