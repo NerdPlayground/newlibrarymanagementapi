@@ -1,13 +1,14 @@
-import re
+from books.models import Book
 from django.http import Http404
 from rest_framework import status
 from students.models import Student
+from transactions.models import Transaction
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.decorators import APIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
-from authentication.serializers import RegisterSerializer,LoginSerializer,UserSerializer
+from authentication.serializers import RegisterSerializer,LoginSerializer,UserSerializer,RequestBookSerializer
 
 class RegisterAPIView(APIView):
     def post(self,request):
@@ -48,6 +49,20 @@ class UserAPIView(APIView):
         users= User.objects.all()
         serializer= UserSerializer(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class RequestBookAPIView(APIView):
+    permission_classes= [IsAuthenticated]
+    def post(self,request):
+        data= request.data
+        serializer= RequestBookSerializer(data=data)
+        if serializer.is_valid():
+            transaction= Transaction.objects.create(
+                student= Student.objects.get(user=request.user),
+                book= Book.objects.get(id=request.data.get('book')),
+            )
+            transaction.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteAPIView(APIView):
     permission_classes= [IsAuthenticated]
