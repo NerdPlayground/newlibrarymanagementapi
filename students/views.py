@@ -10,7 +10,7 @@ class UpdateAPIView(APIView):
     permission_classes= [IsAuthenticated]
     def put(self,request):
         if not request.user.is_staff:
-                student= Student.objects.get(id=request.user.id)
+                student= Student.objects.get(user=request.user)
                 serializer= UpdateSerializer(student,data=request.data)
                 if serializer.is_valid():
                     serializer.save()

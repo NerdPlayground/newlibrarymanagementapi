@@ -1,3 +1,4 @@
+import re
 from django.http import Http404
 from rest_framework import status
 from students.models import Student
@@ -5,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.decorators import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser,IsAuthenticated
 from authentication.serializers import RegisterSerializer,LoginSerializer,UserSerializer
 
 class RegisterAPIView(APIView):
@@ -50,6 +51,13 @@ class UserAPIView(APIView):
 
 class DeleteAPIView(APIView):
     permission_classes= [IsAuthenticated]
+    def delete(self,request):
+        user= request.user
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class DeleteDetailAPIView(APIView):
+    permission_classes= [IsAdminUser]
     
     def get_object(self,pk):
         try:
@@ -60,4 +68,4 @@ class DeleteAPIView(APIView):
     def delete(self,request,pk):
         student= self.get_object(pk)
         student.delete()
-        return Response({"Information":"Student Account Successfully Deleted."},status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
