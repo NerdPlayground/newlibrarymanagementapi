@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 
 class Transaction(models.Model):
     student= models.ForeignKey('students.Student',related_name='transactions',on_delete=models.DO_NOTHING)

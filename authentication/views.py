@@ -1,3 +1,4 @@
+import datetime
 from books.models import Book
 from django.http import Http404
 from rest_framework import status
@@ -8,7 +9,7 @@ from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.decorators import APIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
-from authentication.serializers import RegisterSerializer,LoginSerializer,UserSerializer,RequestBookSerializer
+from authentication.serializers import RegisterSerializer,LoginSerializer,UserSerializer,RequestBookSerializer,IssueBookSerializer
 
 class RegisterAPIView(APIView):
     def post(self,request):
@@ -62,6 +63,25 @@ class RequestBookAPIView(APIView):
             )
             transaction.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class IssueBookAPIView(APIView):
+    permission_classes= [IsAdminUser]
+
+    def get_object(self,pk):
+        try:
+            return Transaction.objects.get(pk=pk)
+        except Transaction.DoesNotExist:
+            raise Http404
+
+    def put(self,request,pk):
+        transaction= self.get_object(pk)
+        serializer= IssueBookSerializer(transaction,data=request.data)
+        if serializer.is_valid():
+            this_time= datetime.datetime.now()
+            this_time= str(this_time).replace(" ","T") + "Z"
+            serializer.save(issued_by=request.user,issued_at=this_time)
+            return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteAPIView(APIView):
