@@ -20,3 +20,11 @@ class TransactionDetailAPIView(APIView):
         transactions= Transaction.objects.filter(student=student)
         serializer= TransactionSerializer(transactions,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class RequestedBooksAPIView(APIView):
+    permission_classes= [IsAdminUser]
+    def get(self,request):
+        transactions= Transaction.objects.filter(issued=False)
+        serializer= TransactionSerializer(transactions,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+            
