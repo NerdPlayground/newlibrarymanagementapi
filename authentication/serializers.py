@@ -1,3 +1,4 @@
+from books.models import Book
 from rest_framework import serializers
 from transactions.models import Transaction
 from django.utils.translation import gettext_lazy as _
@@ -32,3 +33,8 @@ class IssueBookSerializer(serializers.ModelSerializer):
         model= Transaction
         fields= ["issued","issued_at","issued_by"]
         read_only_fields=["issued_at","issued_by"]
+
+class PossessedBooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Book
+        fields= ["book_category","id","book_name","book_author"]
