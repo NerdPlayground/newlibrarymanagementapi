@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'authentication',
     'students',
     'transactions',
+    'fines',
     'rest_framework_simplejwt',
 ]
 
