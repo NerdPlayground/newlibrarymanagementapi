@@ -1,4 +1,5 @@
 import datetime
+from fines.models import Fine
 from books.models import Book
 from django.http import Http404
 from rest_framework import status
@@ -82,8 +83,9 @@ class IssueBookAPIView(APIView):
         transaction= self.get_object(pk)
         serializer= IssueBookSerializer(transaction,data=request.data)
         if serializer.is_valid():
-            this_time= datetime.datetime.now()
-            this_time= str(this_time).replace(" ","T") + "Z"
+            # this_time= datetime.datetime.now()
+            # this_time= str(this_time).replace(" ","T") + "Z"
+            this_time= "2022-03-02T15:53:01.946805Z"
             serializer.save(issued_by=request.user,issued_at=this_time)
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
@@ -150,9 +152,17 @@ class DueBooksAPIView(APIView):
             transactions= Transaction.objects.filter(student=student)
             retained_transactions= transactions.filter(returned=False)
             books= list()
+
             for transaction in retained_transactions:
-                if self.difference(transaction.issued_at) > 1:
+                time_difference= self.difference(transaction.issued_at)
+                if time_difference > 1:
                     books.append(transaction.book)
+                    fine= Fine.objects.get_or_create(
+                        student= student,
+                        transaction= transaction,
+                        amount= time_difference * 50
+                    )
+
             serializer= PossessedBooksSerializer(books,many=True)
             return Response(serializer.data,status=status.HTTP_200_OK)
         else:
