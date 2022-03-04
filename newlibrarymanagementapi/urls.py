@@ -24,6 +24,7 @@ urlpatterns = [
     path('',include('authentication.urls')),
     path('',include('students.urls')),
     path('',include('transactions.urls')),
+    path('',include('fines.urls')),
     # path('',include('.urls')),
     path('api/token/',TokenObtainPairView.as_view(),name='token'),
     path('api/token/refresh',TokenRefreshView.as_view(),name='token-refresh')
