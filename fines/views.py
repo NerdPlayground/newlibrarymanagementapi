@@ -49,12 +49,15 @@ class UpdateFines:
         else:
             return int(today)-int(then)
     
-    def upddate_fines(self,fines):
+    def upddate_fine(self,fine):
         today= str(datetime.datetime.now()).replace(" ","T") + "Z"
+        if fine.created_at is not today:
+            fine.amount= self.difference(fine.transaction.issued_at)*50
+            fine.save()
+
+    def upddate_fines(self,fines):
         for fine in fines:
-            if fine.created_at is not today:
-                fine.amount= self.difference(fine.transaction.issued_at)*50
-                fine.save()
+                self.upddate_fine(fine)
 
 class FineAPIView(APIView):
     permission_classes= [IsAdminUser]
@@ -74,3 +77,14 @@ class FineDetailAPIView(APIView):
         fines= Fine.objects.filter(student=student)
         serializer= FineSerializer(fines,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class PayFineAPIView(APIView):
+    permission_classes= [IsAuthenticated]
+    def post(self,request):
+        fine= Fine.objects.get(id=request.data.get('fine'))
+        amount= request.data.get('amount')
+        if amount < fine.amount:
+            return Response({"Fine":fine.amount,"Message":"Please pay the full amount"},status=status.HTTP_200_OK)
+        else:
+            fine.delete()
+            return Response({"Message":"Thank you for clearing your fine."},status=status.HTTP_200_OK)
