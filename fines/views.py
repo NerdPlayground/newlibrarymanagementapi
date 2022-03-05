@@ -6,7 +6,7 @@ from students.models import Student
 from fines.serializers import FineSerializer
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from rest_framework.decorators import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 
 class UpdateFines:
@@ -59,7 +59,7 @@ class UpdateFines:
         for fine in fines:
                 self.upddate_fine(fine)
 
-class FineAPIView(APIView):
+class FineAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     def get(self,request):
         perform_update= UpdateFines()
@@ -68,7 +68,7 @@ class FineAPIView(APIView):
         serializer= FineSerializer(fines,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class FineDetailAPIView(APIView):
+class FineDetailAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def get(self,request):
         student= Student.objects.get(user=request.user)
@@ -78,7 +78,7 @@ class FineDetailAPIView(APIView):
         serializer= FineSerializer(fines,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class PayFineAPIView(APIView):
+class PayFineAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def post(self,request):
         fine= Fine.objects.get(id=request.data.get('fine'))

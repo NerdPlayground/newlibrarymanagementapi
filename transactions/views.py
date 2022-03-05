@@ -2,18 +2,18 @@ from rest_framework import status
 from students.models import Student
 from transactions.models import Transaction
 from rest_framework.response import Response
-from rest_framework.decorators import APIView
+from rest_framework.generics import GenericAPIView
 from transactions.serializers import TransactionSerializer
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 
-class TransactionAPIView(APIView):
+class TransactionAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     def get(self,request):
         transactions= Transaction.objects.all()
         serializer= TransactionSerializer(transactions,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class TransactionDetailAPIView(APIView):
+class TransactionDetailAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def get(self,request):
         student= Student.objects.get(user=request.user)
@@ -21,7 +21,7 @@ class TransactionDetailAPIView(APIView):
         serializer= TransactionSerializer(transactions,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class RequestedBooksAPIView(APIView):
+class RequestedBooksAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     def get(self,request):
         transactions= Transaction.objects.filter(issued=False)

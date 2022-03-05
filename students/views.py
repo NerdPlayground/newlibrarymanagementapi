@@ -2,11 +2,11 @@ from django.http import Http404
 from rest_framework import status
 from students.models import Student
 from rest_framework.response import Response
-from rest_framework.decorators import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from students.serializers import UpdateSerializer,StudentSerializer
 
-class UpdateAPIView(APIView):
+class UpdateAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def put(self,request):
         if not request.user.is_staff:
@@ -19,14 +19,14 @@ class UpdateAPIView(APIView):
         else:
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
-class StudentAPIView(APIView):
+class StudentAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     def get(self,request):
         students= Student.objects.all()
         serializer= StudentSerializer(students,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class StudentDetailAPIView(APIView):
+class StudentDetailAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def get(self,request):
         if not request.user.is_staff:

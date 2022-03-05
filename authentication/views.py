@@ -9,14 +9,15 @@ from transactions.models import Transaction
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from rest_framework.decorators import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 from authentication.serializers import (
     RegisterSerializer,LoginSerializer,UserSerializer,
     RequestBookSerializer,IssueBookSerializer,PossessedBooksSerializer
 )
 
-class RegisterAPIView(APIView):
+class RegisterAPIView(GenericAPIView):
+    serializer_class = RegisterSerializer
     def post(self,request):
         serializer= RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -39,7 +40,7 @@ class RegisterAPIView(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class LoginAPIView(APIView):
+class LoginAPIView(GenericAPIView):
     def post(self,request):
         username= request.data.get('username')
         password= request.data.get('password')
@@ -50,13 +51,13 @@ class LoginAPIView(APIView):
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.data,status=status.HTTP_401_UNAUTHORIZED)
 
-class UserAPIView(APIView):
+class UserAPIView(GenericAPIView):
     def get(self,request):
         users= User.objects.all()
         serializer= UserSerializer(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class RequestBookAPIView(APIView):
+class RequestBookAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def post(self,request):
         data= request.data
@@ -70,7 +71,7 @@ class RequestBookAPIView(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class IssueBookAPIView(APIView):
+class IssueBookAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
 
     def get_object(self,pk):
@@ -90,7 +91,7 @@ class IssueBookAPIView(APIView):
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class PossessedBooksAPIView(APIView):
+class PossessedBooksAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def get(self,request):
         if not request.user.is_staff:
@@ -105,7 +106,7 @@ class PossessedBooksAPIView(APIView):
         else:
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
-class DueBooksAPIView(APIView):
+class DueBooksAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def difference(self,issued_at):
         today,then= int(datetime.datetime.now().strftime("%d")),int(issued_at.strftime("%d"))
@@ -168,14 +169,14 @@ class DueBooksAPIView(APIView):
         else:
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
-class DeleteAPIView(APIView):
+class DeleteAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     def delete(self,request):
         user= request.user
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class DeleteDetailAPIView(APIView):
+class DeleteDetailAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     
     def get_object(self,pk):
