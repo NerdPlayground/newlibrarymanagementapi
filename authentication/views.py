@@ -17,7 +17,7 @@ from authentication.serializers import (
 )
 
 class RegisterAPIView(GenericAPIView):
-    serializer_class = RegisterSerializer
+    serializer_class= RegisterSerializer
     def post(self,request):
         serializer= RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -41,6 +41,7 @@ class RegisterAPIView(GenericAPIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPIView(GenericAPIView):
+    serializer_class= LoginSerializer
     def post(self,request):
         username= request.data.get('username')
         password= request.data.get('password')
@@ -52,12 +53,14 @@ class LoginAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_401_UNAUTHORIZED)
 
 class UserAPIView(GenericAPIView):
+    serializer_class= UserSerializer
     def get(self,request):
         users= User.objects.all()
         serializer= UserSerializer(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class RequestBookAPIView(GenericAPIView):
+    serializer_class= RequestBookSerializer
     permission_classes= [IsAuthenticated]
     def post(self,request):
         data= request.data
@@ -72,8 +75,8 @@ class RequestBookAPIView(GenericAPIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class IssueBookAPIView(GenericAPIView):
+    serializer_class= IssueBookSerializer
     permission_classes= [IsAdminUser]
-
     def get_object(self,pk):
         try:
             return Transaction.objects.get(pk=pk)
@@ -92,6 +95,7 @@ class IssueBookAPIView(GenericAPIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class PossessedBooksAPIView(GenericAPIView):
+    serializer_class= PossessedBooksSerializer
     permission_classes= [IsAuthenticated]
     def get(self,request):
         if not request.user.is_staff:
@@ -107,6 +111,7 @@ class PossessedBooksAPIView(GenericAPIView):
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
 class DueBooksAPIView(GenericAPIView):
+    serializer_class= PossessedBooksSerializer
     permission_classes= [IsAuthenticated]
     def difference(self,issued_at):
         today,then= int(datetime.datetime.now().strftime("%d")),int(issued_at.strftime("%d"))

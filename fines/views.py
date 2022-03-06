@@ -60,6 +60,7 @@ class UpdateFines:
                 self.upddate_fine(fine)
 
 class FineAPIView(GenericAPIView):
+    serializer_class= FineSerializer
     permission_classes= [IsAdminUser]
     def get(self,request):
         perform_update= UpdateFines()
@@ -69,6 +70,7 @@ class FineAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class FineDetailAPIView(GenericAPIView):
+    serializer_class= FineSerializer
     permission_classes= [IsAuthenticated]
     def get(self,request):
         student= Student.objects.get(user=request.user)

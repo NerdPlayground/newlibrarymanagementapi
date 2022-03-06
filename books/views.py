@@ -7,6 +7,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser
 
 class AddBookAPIView(GenericAPIView):
+    serializer_class= BookSerializer
     def post(self,request):
         serializer= BookSerializer(data=request.data)
         if serializer.is_valid():
@@ -15,6 +16,7 @@ class AddBookAPIView(GenericAPIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class ViewBookAPIView(GenericAPIView):
+    serializer_class= BookSerializer
     def get_object(self,pk):
         try:
             return Book.objects.get(pk=pk)
@@ -27,12 +29,14 @@ class ViewBookAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class ViewBooksAPIView(GenericAPIView):
+    serializer_class= BookSerializer
     def get(self,request):
         categories= Book.objects.all()
         serializer= BookSerializer(categories,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class EditBookAPIView(GenericAPIView):
+    serializer_class= BookSerializer
     def get_object(self,pk):
         try:
             return Book.objects.get(pk=pk)

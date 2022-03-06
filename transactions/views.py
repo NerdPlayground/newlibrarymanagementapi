@@ -7,6 +7,7 @@ from transactions.serializers import TransactionSerializer
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 
 class TransactionAPIView(GenericAPIView):
+    serializer_class= TransactionSerializer
     permission_classes= [IsAdminUser]
     def get(self,request):
         transactions= Transaction.objects.all()
@@ -14,6 +15,7 @@ class TransactionAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class TransactionDetailAPIView(GenericAPIView):
+    serializer_class= TransactionSerializer
     permission_classes= [IsAuthenticated]
     def get(self,request):
         student= Student.objects.get(user=request.user)
@@ -22,6 +24,7 @@ class TransactionDetailAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class RequestedBooksAPIView(GenericAPIView):
+    serializer_class= TransactionSerializer
     permission_classes= [IsAdminUser]
     def get(self,request):
         transactions= Transaction.objects.filter(issued=False)

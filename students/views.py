@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from students.serializers import UpdateSerializer,StudentSerializer
 
 class UpdateAPIView(GenericAPIView):
+    serializer_class= UpdateSerializer
     permission_classes= [IsAuthenticated]
     def put(self,request):
         if not request.user.is_staff:
@@ -20,6 +21,7 @@ class UpdateAPIView(GenericAPIView):
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
 class StudentAPIView(GenericAPIView):
+    serializer_class= StudentSerializer
     permission_classes= [IsAdminUser]
     def get(self,request):
         students= Student.objects.all()
@@ -27,6 +29,7 @@ class StudentAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class StudentDetailAPIView(GenericAPIView):
+    serializer_class= StudentSerializer
     permission_classes= [IsAuthenticated]
     def get(self,request):
         if not request.user.is_staff:
