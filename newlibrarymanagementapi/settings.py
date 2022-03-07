@@ -147,6 +147,16 @@ SIMPLE_JWT= {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=5),
 }
 
+SWAGGER_SETTINGS ={
+    'SECURITY_DEFINITIONS':{
+        'Bearer':{
+            'type':'apiKey',
+            'name':'Authorization',
+            'in':'header'
+        }
+    }
+}
+
 CORS_ALLOW_ALL_ORIGINS= True
 
 django_heroku.settings(locals())
