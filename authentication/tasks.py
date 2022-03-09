@@ -1,6 +1,7 @@
 import random
 from celery import shared_task
 from students.models import Student
+from django.contrib.auth.models import User
 
 @shared_task(name="sum_two_numbers")
 def add(x, y):
@@ -15,9 +16,13 @@ def mul(x, y):
 def xsum(numbers):
     return sum(numbers)
 
-@shared_task(name="get_student_object")
-def get_student():
-    student= Student.objects.get(pk=1)
-    return {
-        "student": student,
-    }
+@shared_task(name="create_patron_object")
+def patron():
+    user = User.objects.create_user(
+        first_name= "Bertilla",
+        last_name= "Khavetsa",
+        username= "reader_1803128",
+        email= "bertilla@gmail.com"
+    )
+    user.set_password("bertilla23!@#")
+    user.save()
