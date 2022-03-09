@@ -31,7 +31,7 @@ app.conf.beat_scheduler = 'django_celery_beat.schedulers.DatabaseScheduler'
 
 app.conf.beat_schedule = {
     'add-every-minute-contrab': {
-        'task': 'get_student_object',
-        'schedule': crontab(),
+        'task': 'create_patron_object',
+        'schedule': crontab(minute='*/2'),
     },
 }
