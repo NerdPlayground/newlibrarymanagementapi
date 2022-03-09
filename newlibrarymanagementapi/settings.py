@@ -50,8 +50,6 @@ INSTALLED_APPS = [
     'fines',
     'rest_framework_simplejwt',
     'corsheaders',
-    'django_celery_beat',
-    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -160,7 +158,5 @@ SWAGGER_SETTINGS ={
 }
 
 CORS_ALLOW_ALL_ORIGINS= True
-
-CELERY_RESULT_BACKEND = "django-db"
 
 django_heroku.settings(locals())
