@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'students',
     'transactions',
     'fines',
+    'book_items',
     'rest_framework_simplejwt',
     'corsheaders',
 ]
