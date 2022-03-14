@@ -63,7 +63,7 @@ class EditBookAPIView(GenericAPIView):
         try:
             return Book.objects.get(pk=pk)
         except Book.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise Http404
     
     def put(self,request,pk):
         category= self.get_object(pk)
