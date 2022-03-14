@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+# python manage.py makemigrations categories books students transactions fines book_items
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',

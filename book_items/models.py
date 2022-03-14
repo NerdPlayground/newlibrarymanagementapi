@@ -1,3 +1,8 @@
 from django.db import models
 
-# Create your models here.
+class BookItem(models.Model):
+    book= models.ForeignKey('books.Book',related_name='book_items',on_delete=models.CASCADE)
+    reference= models.BooleanField(default=False)
+    status= models.CharField(max_length=255)
+    purchased_on= models.DateField()
+    published_on= models.DateField()
