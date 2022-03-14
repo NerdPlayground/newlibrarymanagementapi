@@ -7,8 +7,8 @@ class AddRackSerializer(serializers.ModelSerializer):
         model= Rack
         fields= ["id","floor","segment","position","rack_number"]
 
-class ViewRackSerializer(serializers.ModelSerializer):
-    book_items= serializers.PrimaryKeyRelatedField(many=True,queryset=BookItem.objects.all())
+class ViewRackSerializer(serializers.HyperlinkedModelSerializer):
+    book_items= serializers.HyperlinkedRelatedField(many=True,view_name="view-book-item",read_only=True)
     class Meta:
         model= Rack
         fields= ["id","floor","segment","position","rack_number","book_items"]

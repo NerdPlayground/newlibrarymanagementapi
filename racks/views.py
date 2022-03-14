@@ -19,5 +19,6 @@ class ViewRackAPIView(GenericAPIView):
     serializer_class= ViewRackSerializer
     def get(self,request):
         racks= Rack.objects.all()
-        serializer= ViewRackSerializer(racks,many=True)
+        serializer_context= {'request':request}
+        serializer= ViewRackSerializer(racks,many=True,context=serializer_context)
         return Response(serializer.data,status=status.HTTP_200_OK)
