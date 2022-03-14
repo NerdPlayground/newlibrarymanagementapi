@@ -25,6 +25,8 @@ class AddBookAPIView(GenericAPIView):
         quantity= request.data.get('quantity')
         if quantity == None:
             return Response({"quantity":["This field is required"]},status=status.HTTP_400_BAD_REQUEST)
+        elif quantity < 1:
+            return Response({"quantity":["This field should be at least 1"]},status=status.HTTP_400_BAD_REQUEST)
         
         serializer= BookSerializer(data=request.data)
         if serializer.is_valid():
