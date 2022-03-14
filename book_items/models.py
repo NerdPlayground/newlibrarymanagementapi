@@ -6,3 +6,4 @@ class BookItem(models.Model):
     status= models.CharField(max_length=255)
     purchased_on= models.DateField()
     published_on= models.DateField()
+    rack= models.ForeignKey('racks.Rack',related_name='book_items',on_delete=models.DO_NOTHING)

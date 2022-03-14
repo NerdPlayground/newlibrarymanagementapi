@@ -12,10 +12,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name='Rack',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('category_name', models.CharField(max_length=255)),
+                ('floor', models.IntegerField()),
+                ('segment', models.CharField(max_length=255)),
+                ('position', models.CharField(max_length=255)),
+                ('rack_number', models.IntegerField()),
             ],
         ),
     ]
