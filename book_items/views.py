@@ -28,6 +28,11 @@ class BookItemDetailAPIView(GenericAPIView):
         except BookItem.DoesNotExist:
             raise Http404
     
+    def get(self,request,pk):
+        book_item= self.get_object(pk)
+        serializer= BookItemSerializer(book_item)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
     def put(self,request,pk):
         book_item= self.get_object(pk)
         serializer= BookItemSerializer(book_item,data=request.data)
