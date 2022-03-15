@@ -78,14 +78,14 @@ class EditBookAPIView(GenericAPIView):
             raise Http404
     
     def put(self,request,pk):
-        category= self.get_object(pk)
-        serializer= BookSerializer(category,data=request.data)
+        book= self.get_object(pk)
+        serializer= BookSerializer(book,data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self,request,pk):
-        category= self.get_object(pk)
-        category.delete()
+        book= self.get_object(pk)
+        book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
