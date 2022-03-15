@@ -37,4 +37,4 @@ class IssueBookSerializer(serializers.ModelSerializer):
 class PossessedBooksSerializer(serializers.ModelSerializer):
     class Meta:
         model= Book
-        fields= ["book_category","id","book_name","book_author"]
+        fields= ["category","id","name","author"]
