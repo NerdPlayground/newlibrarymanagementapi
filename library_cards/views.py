@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser,IsAuthenticated
 from library_cards.serializers import LibraryCardSerializer,LibraryCardStatusSerializer
 
 class LibraryCardsAPIView(GenericAPIView):
-    permissions_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     serializer_class= LibraryCardSerializer
 
     def get(self,request):
@@ -17,7 +17,7 @@ class LibraryCardsAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class PatronLibraryCardAPIView(GenericAPIView):
-    permissions_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class= LibraryCardSerializer
 
     def get(self,request):
@@ -27,7 +27,7 @@ class PatronLibraryCardAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class LibraryCardStatusAPIView(GenericAPIView):    
-    permissions_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     serializer_class= LibraryCardStatusSerializer
 
     def get_object(self,pk):
