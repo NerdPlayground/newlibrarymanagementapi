@@ -9,6 +9,7 @@ from transactions.models import Transaction
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
+from library_cards.models import LibraryCard
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 from authentication.serializers import (
@@ -37,6 +38,13 @@ class RegisterAPIView(GenericAPIView):
             )
             student.save()
 
+            library_card= LibraryCard.objects.create(
+                student= student,
+                issued_at= datetime.date.today(),
+                active= True
+            )
+            library_card.save()
+
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
@@ -53,6 +61,7 @@ class LoginAPIView(GenericAPIView):
         return Response(serializer.data,status=status.HTTP_401_UNAUTHORIZED)
 
 class UserAPIView(GenericAPIView):
+    permission_classes= [IsAdminUser]
     serializer_class= UserSerializer
     def get(self,request):
         users= User.objects.all()
