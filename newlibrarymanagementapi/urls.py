@@ -49,6 +49,7 @@ urlpatterns = [
     path('',include('book_items.urls')),
     path('',include('racks.urls')),
     path('',include('library_cards.urls')),
+    path('',include('authors.urls')),
     # path('',include('.urls')),
     path('api/token/',TokenObtainPairView.as_view(),name='token'),
     path('api/token/refresh',TokenRefreshView.as_view(),name='token-refresh')
