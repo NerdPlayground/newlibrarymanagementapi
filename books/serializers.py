@@ -1,6 +1,7 @@
 from books.models import Book
 from book_items.models import BookItem
 from rest_framework import serializers
+from authors.serializers import AuthorSerializer
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:

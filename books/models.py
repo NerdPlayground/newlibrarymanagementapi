@@ -5,7 +5,7 @@ class Book(models.Model):
     category= models.ForeignKey('categories.Category',related_name='books',on_delete=models.CASCADE)
     name= models.CharField(max_length=255)
     description= models.TextField()
-    author= models.CharField(max_length=255)
+    author= models.ManyToManyField('authors.Author',related_name='books')
     published_on= models.DateField()
     publisher= models.CharField(max_length=255)
     language= models.CharField(max_length=255)
