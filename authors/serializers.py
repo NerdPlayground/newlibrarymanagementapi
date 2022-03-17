@@ -6,8 +6,8 @@ class AuthorSerializer(serializers.ModelSerializer):
         model= Author
         fields= ["id","name","description"]
 
-class ViewAuthorSerializer(serializers.HyperlinkedModelSerializer):
-    books= serializers.HyperlinkedRelatedField(many=True,view_name="view-book",read_only=True)
+class ViewAuthorSerializer(serializers.ModelSerializer):
+    books= serializers.PrimaryKeyRelatedField(many=True,read_only=True)
     class Meta:
         model= Author
         fields= ["id","name","description","books"]
