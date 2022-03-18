@@ -15,7 +15,7 @@ class PatronReservationsAPIView(GenericAPIView):
         try:
             student= Student.objects.get(user=request.user)
             reservations= Reservation.objects.get(student=student)
-            serializer= ReservationSerializer(reservations,many=True)
+            serializer= ReservationSerializer(reservations)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Reservation.DoesNotExist:
             return Response({"message":"No Reservations Made"},status=status.HTTP_404_NOT_FOUND)

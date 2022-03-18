@@ -3,9 +3,7 @@ import datetime
 
 class Transaction(models.Model):
     student= models.ForeignKey('students.Student',related_name='transactions',on_delete=models.DO_NOTHING)
-    book= models.OneToOneField('books.Book',related_name='transaction',on_delete=models.DO_NOTHING)
-    issued= models.BooleanField(default=False)
-    issued_at= models.DateTimeField(null=True,blank=True)
-    issued_by= models.ForeignKey('auth.User',related_name='transactions',on_delete=models.DO_NOTHING,null=True,blank=True)
-    returned= models.BooleanField(default=False)
-    returned_at= models.DateTimeField(null=True,blank=True)
+    book_item= models.ForeignKey('book_items.BookItem',related_name='transactions',on_delete=models.DO_NOTHING)
+    issued_at= models.DateField(auto_now_add=True)
+    due_date= models.DateField()
+    returned_at= models.DateField(null=True,blank=True)
