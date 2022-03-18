@@ -51,11 +51,10 @@ INSTALLED_APPS = [
     'racks',
     'library_cards',
     'authors',
+    'reservations',
     'rest_framework_simplejwt',
     'corsheaders',
 ]
-
-# python manage.py makemigrations categories books students transactions fines book_items racks library_cards authors
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
