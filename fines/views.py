@@ -3,11 +3,29 @@ from fines.models import Fine
 from django.http import Http404
 from rest_framework import status
 from students.models import Student
+from transactions.models import Transaction
 from fines.serializers import FineSerializer
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
+
+class UpdatePatronFinesAPIView(GenericAPIView):
+    permission_classes= [IsAdminUser]
+    serializer_class= [FineSerializer]
+
+    def get(self,request):
+        loaned_books= Transaction.objects.filter(returned_at=None,due_date__lt=datetime.date.today())
+        for loaned_book in loaned_books:
+            fine= Fine.objects.get_or_create(transaction= loaned_book,amount= 50)
+            if not fine[1]:
+                fine= fine[0]
+                fine.amount= (datetime.date.today() - loaned_book.due_date)*50
+                fine.save()
+        
+        fines= Fine.objects.all()
+        serializer= FineSerializer(fines,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 class UpdateFines:
     def difference(self,before):
