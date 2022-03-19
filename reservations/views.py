@@ -30,10 +30,10 @@ class CancelReservationAPIView(GenericAPIView):
         except Reservation.DoesNotExist:
             raise Http404
     
-    def put(self,request,pk):
+    def delete(self,request,pk):
         reservation= self.get_object(pk)
-        serializer= ReservationSerializer(reservation,data=request)
-        if serializer.is_valid():
-            serializer.save(status="Cancel")
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        book_item= reservation.book_item
+        book_item.status= "Loaned"
+        book_item.save()
+        reservation.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
