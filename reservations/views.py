@@ -12,13 +12,16 @@ class PatronReservationsAPIView(GenericAPIView):
     serializer_class= [ReservationSerializer]
     
     def get(self,request):
-        try:
-            student= Student.objects.get(user=request.user)
-            reservations= Reservation.objects.filter(student=student)
-            serializer= ReservationSerializer(reservations,many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except Reservation.DoesNotExist:
-            return Response({"message":"No Reservations Made"},status=status.HTTP_404_NOT_FOUND)
+        if not request.user.is_staff:
+            try:
+                student= Student.objects.get(user=request.user)
+                reservations= Reservation.objects.filter(student=student)
+                serializer= ReservationSerializer(reservations,many=True)
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            except Reservation.DoesNotExist:
+                return Response({"message":"No Reservations Made"},status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
 class CancelReservationAPIView(GenericAPIView):
     serializer_class= [ReservationSerializer]
@@ -31,9 +34,12 @@ class CancelReservationAPIView(GenericAPIView):
             raise Http404
     
     def delete(self,request,pk):
-        reservation= self.get_object(pk)
-        book_item= reservation.book_item
-        book_item.status= "Loaned"
-        book_item.save()
-        reservation.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if not request.user.is_staff:
+            reservation= self.get_object(pk)
+            book_item= reservation.book_item
+            book_item.status= "Loaned"
+            book_item.save()
+            reservation.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
