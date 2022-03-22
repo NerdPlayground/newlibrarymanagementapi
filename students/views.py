@@ -1,10 +1,13 @@
 import datetime
+from fines.models import Fine
 from django.http import Http404
 from rest_framework import status
 from students.models import Student
 from book_items.models import BookItem
+from transactions.models import Transaction
 from reservations.models import Reservation
 from rest_framework.response import Response
+from library_cards.models import LibraryCard
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from students.serializers import UpdateSerializer,StudentSerializer,CheckOutBookItemSerializer
@@ -60,6 +63,7 @@ class CheckOutBookItemAPIView(GenericAPIView):
                             due_date= datetime.date.today()+datetime.timedelta(days=5)
                         )
                         book_item.status= "Loaned"
+                        book_item.loaned_to= student
                         book_item.save()
                         return Response(serializer.data,status=status.HTTP_201_CREATED)
 
@@ -70,6 +74,7 @@ class CheckOutBookItemAPIView(GenericAPIView):
                         )
 
                         book_item.status = "Reserved"
+                        book_item.reserved_by= student
                         book_item.save()
 
                         return Response(
@@ -93,9 +98,40 @@ class CheckOutBookItemAPIView(GenericAPIView):
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
 class ReturnBookItemAPIView(GenericAPIView):
+    permission_classes= [IsAuthenticated]
     def post(self,request):
-        pass
+        book_item= BookItem.objects.get(id=request.data.get('book_item'))
+        student= Student.objects.get(user=request.user)
+        message= "Book item successfully returned. Thank you for reading with us"
+        if student == book_item.loaned_to:
+            transaction= Transaction.objects.get(book_item=book_item,returned_at=None)
+            if transaction.due_date < datetime.date.today():
+                library_card= LibraryCard.objects.get(student=student)
+                library_card.active= False
+                library_card.save()
+                message= "Pay existing fine to actvate library card"
+
+            book_item.loaned_to= None
+            if book_item.reserved_by is not None:
+                # send notification
+                pass
+            else:
+                book_item.status= "Available"
+            book_item.save()
+            transaction.returned_at= datetime.date.today()
+            transaction.save()
+            return Response({"message": message},status=status.HTTP_200_OK)
+        else:
+            return Response({"Warning":"Student loaned to and current user don't match"})
 
 class RenewBookItemAPIView(GenericAPIView):
     def post(self,request):
         pass
+
+class ModifyTransactionAPIView(GenericAPIView):
+    def get(self,request):
+        transaction= Transaction.objects.get(id=8)
+        transaction.issued_at= datetime.date.today()-datetime.timedelta(days=8)
+        transaction.due_date= datetime.date.today()-datetime.timedelta(days=3)
+        transaction.save()
+        return Response(status=status.HTTP_200_OK)
