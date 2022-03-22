@@ -8,6 +8,7 @@ from transactions.models import Transaction
 from reservations.models import Reservation
 from rest_framework.response import Response
 from library_cards.models import LibraryCard
+from notifications.models import Notification
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from students.serializers import UpdateSerializer,StudentSerializer,CheckOutBookItemSerializer
@@ -113,8 +114,13 @@ class ReturnBookItemAPIView(GenericAPIView):
 
             book_item.loaned_to= None
             if book_item.reserved_by is not None:
-                # send notification
-                pass
+                name= book_item.book.name
+                notification= Notification.objects.create(
+                    student= book_item.reserved_by,
+                    title= "Reserved Book",
+                    message= name+" is available for checkout."
+                )
+                notification.save()
             else:
                 book_item.status= "Available"
             book_item.save()
