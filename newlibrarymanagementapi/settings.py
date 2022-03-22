@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'library_cards',
     'authors',
     'reservations',
+    'notifications',
     'rest_framework_simplejwt',
     'corsheaders',
 ]
