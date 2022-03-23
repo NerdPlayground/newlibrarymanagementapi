@@ -6,6 +6,7 @@ from students.models import Student
 from transactions.models import Transaction
 from fines.serializers import FineSerializer
 from rest_framework.response import Response
+from notifications.models import Notification
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 
@@ -16,24 +17,40 @@ class UpdatePatronFinesAPIView(GenericAPIView):
     def __init__(self):
         self.today= datetime.date.today()
 
-    def get_object(self,loaned_book):
+    def get_object(self,loaned_book,amount):
         try:
             return (Fine.objects.get(transaction=loaned_book),True,)
         except Fine.DoesNotExist:
             fine= Fine.objects.create(
                 transaction= loaned_book,
-                amount= (self.today-loaned_book.due_date).days * 50,
+                amount= amount,
             )
             return (fine,False,)
 
     def get(self,request):
         loaned_books= Transaction.objects.filter(returned_at=None,due_date__lt=self.today)
         for loaned_book in loaned_books:
-            retrieved_fine= self.get_object(loaned_book)
+            amount= (self.today-loaned_book.due_date).days * 50
+            retrieved_fine= self.get_object(
+                loaned_book= loaned_book,
+                amount= amount
+            )
+            
             if retrieved_fine[1]:
                 fine= retrieved_fine[0]
-                fine.amount= (self.today-loaned_book.due_date).days * 50
+                fine.amount= amount
                 fine.save()
+            
+            notification= Notification.objects.create(
+                student= loaned_book.student,
+                title= "Overdue Book",
+                message= "The book item (" 
+                +loaned_book.book_item.book.name +")"
+                +" is overdue. You are required to return"
+                +" the book item and pay the incurred fine."
+                +" Fine: " +str(amount) +" Kenyan Shillings"
+            )
+            notification.save()
         
         return Response({"message":"Library fines have been updated."},status=status.HTTP_200_OK)
 
