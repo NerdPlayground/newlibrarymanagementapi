@@ -150,7 +150,7 @@ class RenewBookItemAPIView(GenericAPIView):
 
 class ModifyTransactionAPIView(GenericAPIView):
     def get(self,request):
-        transaction= Transaction.objects.get(id=18)
+        transaction= Transaction.objects.get(id=19)
         transaction.issued_at= datetime.date.today()-datetime.timedelta(days=8)
         transaction.due_date= datetime.date.today()-datetime.timedelta(days=3)
         transaction.save()

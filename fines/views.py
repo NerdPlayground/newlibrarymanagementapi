@@ -6,6 +6,7 @@ from students.models import Student
 from transactions.models import Transaction
 from fines.serializers import FineSerializer
 from rest_framework.response import Response
+from library_cards.models import LibraryCard
 from notifications.models import Notification
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
@@ -83,21 +84,24 @@ class FineDetailAPIView(GenericAPIView):
         serializer= FineSerializer(fines,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-# class PayFineAPIView(GenericAPIView):
-#     permission_classes= [IsAuthenticated]
-#     def get_object(self,pk):
-#         try:
-#             return Fine.objects.get(pk=pk)
-#         except Fine.DoesNotExist:
-#             raise Http404
+class PayFineAPIView(GenericAPIView):
+    permission_classes= [IsAuthenticated]
+    def get_object(self,pk):
+        try:
+            return Fine.objects.get(pk=pk)
+        except Fine.DoesNotExist:
+            raise Http404
     
-#     def post(self,request,pk):
-#         fine= self.get_object(pk=pk)
-#         amount= request.data.get('amount')
+    def post(self,request,pk):
+        fine= self.get_object(pk=pk)
+        amount= request.data.get('amount')
 
-#         if amount < fine.amount:
-#             return Response({"Fine":fine.amount,"Message":"Please pay the full amount"},status=status.HTTP_200_OK)
-#         else:
-#             fine.paid_on= datetime.date.today()
-#             fine.save()
-#             return Response({"Message":"Thank you for clearing your fine."},status=status.HTTP_200_OK)
+        if amount < fine.amount:
+            return Response({"Fine":fine.amount,"Message":"Please pay the full amount"},status=status.HTTP_200_OK)
+        else:
+            fine.paid_on= datetime.date.today()
+            fine.save()
+            library_card= LibraryCard.objects.get(student=fine.transaction.student)
+            library_card.active= True
+            library_card.save()
+            return Response({"Message":"Thank you for clearing your fine."},status=status.HTTP_200_OK)
