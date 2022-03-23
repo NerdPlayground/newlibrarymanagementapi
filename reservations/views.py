@@ -38,6 +38,7 @@ class CancelReservationAPIView(GenericAPIView):
             reservation= self.get_object(pk)
             book_item= reservation.book_item
             book_item.status= "Loaned"
+            book_item.reserved_by= None
             book_item.save()
             reservation.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
