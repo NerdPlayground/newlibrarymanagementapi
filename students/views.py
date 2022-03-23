@@ -54,18 +54,32 @@ class CheckOutBookItemAPIView(GenericAPIView):
         if not request.user.is_staff:
             book_item= BookItem.objects.get(id=request.data.get("book_item"))
             student= Student.objects.get(user=request.user)
+            due_date= datetime.date.today()+datetime.timedelta(days=5)
             serializer= CheckOutBookItemSerializer(data=request.data)
 
             if serializer.is_valid():
                 if not book_item.reference:
                     if book_item.status == "Available":
                         serializer.save(
-                            student= Student.objects.get(user=request.user),
-                            due_date= datetime.date.today()+datetime.timedelta(days=5)
+                            student= student,
+                            due_date= due_date
                         )
                         book_item.status= "Loaned"
                         book_item.loaned_to= student
                         book_item.save()
+
+                        name= book_item.book.name
+                        notification= Notification.objects.create(
+                            student= student,
+                            title= "Book Lending",
+                            message= "You have checked out " +name
+                            +". Ensure the book item is returned or"
+                            +" your transaction is renewed"
+                            +" before or on " +str(due_date)
+                            +" to avoid revocation of your library card."
+                        )
+                        notification.save()
+
                         return Response(serializer.data,status=status.HTTP_201_CREATED)
 
                     elif book_item.status == "Loaned":
