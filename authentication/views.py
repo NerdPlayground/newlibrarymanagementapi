@@ -153,7 +153,7 @@ class DueBooksAPIView(GenericAPIView):
         elif int(this_month != last_month):
             last_month_days= (
                 31 if last_month in [1,3,5,7,8,10,12]
-                else 28 if last_month is 2 and last_year % 4 == 0
+                else 28 if last_month == 2 and last_year % 4 == 0
                 else 30
             )
             return last_month_days+today-then
