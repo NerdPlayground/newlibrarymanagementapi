@@ -12,10 +12,7 @@ from rest_framework.response import Response
 from library_cards.models import LibraryCard
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
-from authentication.serializers import (
-    RegisterSerializer,LoginSerializer,
-    UserSerializer,EditUserSerializer
-)
+from authentication.serializers import RegisterSerializer,UserSerializer,EditUserSerializer
 
 class RegisterAPIView(GenericAPIView):
     serializer_class= RegisterSerializer
@@ -47,18 +44,6 @@ class RegisterAPIView(GenericAPIView):
 
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
-class LoginAPIView(GenericAPIView):
-    serializer_class= LoginSerializer
-    def post(self,request):
-        username= request.data.get('username')
-        password= request.data.get('password')
-        user= authenticate(username=username,password=password)
-
-        if user is not None:
-            serializer= LoginSerializer(user)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.data,status=status.HTTP_401_UNAUTHORIZED)
 
 class UserAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
