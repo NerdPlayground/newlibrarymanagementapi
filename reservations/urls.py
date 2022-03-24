@@ -3,5 +3,5 @@ from reservations.views import PatronReservationsAPIView,CancelReservationAPIVie
 
 urlpatterns= [
     path('reservations/',PatronReservationsAPIView.as_view(),name='reservations'),
-    path('reservations/cancel-reservation/<int:pk>/',CancelReservationAPIView.as_view(),name='cancel-reservation'),
+    path('reservations/cancel-reservation/<str:pk>/',CancelReservationAPIView.as_view(),name='cancel-reservation'),
 ]

@@ -34,8 +34,8 @@ class AddBookAPIView(GenericAPIView):
         
         if rack == None:
             return Response({"rack":["This field is required"]},status=status.HTTP_400_BAD_REQUEST)
-        elif rack < 1:
-            return Response({"rack":["This field should have a valid identifier starting from 1"]},status=status.HTTP_400_BAD_REQUEST)
+        elif rack == "":
+            return Response({"rack":["This field should have a valid identifier"]},status=status.HTTP_400_BAD_REQUEST)
         
         serializer= BookSerializer(data=request.data)
         if serializer.is_valid():

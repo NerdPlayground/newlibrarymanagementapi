@@ -13,7 +13,7 @@ class StudentSerializer(serializers.ModelSerializer):
         model= Student
         fields= ["id","first_name","last_name","registration_number","campus","faculty","course","mode_of_study"]
 
-class CheckOutBookItemSerializer(serializers.ModelSerializer):
+class BookItemSerializer(serializers.ModelSerializer):
     class Meta:
         model= Transaction
         fields= ["student","book_item","issued_at","due_date","returned_at"]

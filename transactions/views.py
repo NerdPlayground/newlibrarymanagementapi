@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import status
 from students.models import Student
 from transactions.models import Transaction
@@ -6,7 +7,7 @@ from rest_framework.generics import GenericAPIView
 from transactions.serializers import TransactionSerializer
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 
-class TransactionAPIView(GenericAPIView):
+class LibraryTransactionsAPIView(GenericAPIView):
     serializer_class= TransactionSerializer
     permission_classes= [IsAdminUser]
     def get(self,request):
@@ -14,7 +15,7 @@ class TransactionAPIView(GenericAPIView):
         serializer= TransactionSerializer(transactions,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class TransactionDetailAPIView(GenericAPIView):
+class PatronTransactionsAPIView(GenericAPIView):
     serializer_class= TransactionSerializer
     permission_classes= [IsAuthenticated]
     def get(self,request):
@@ -23,11 +24,17 @@ class TransactionDetailAPIView(GenericAPIView):
         serializer= TransactionSerializer(transactions,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class RequestedBooksAPIView(GenericAPIView):
+class TransactionDetailAPIView(GenericAPIView):
     serializer_class= TransactionSerializer
-    permission_classes= [IsAdminUser]
-    def get(self,request):
-        transactions= Transaction.objects.filter(issued=False)
-        serializer= TransactionSerializer(transactions,many=True)
+    permission_classes= [IsAuthenticated]
+
+    def get_object(self,pk):
+        try:
+            return Transaction.objects.get(pk=pk)
+        except Transaction.DoesNotExist:
+            raise Http404
+    
+    def get(self,request,pk):
+        transaction= self.get_object(pk=pk)
+        serializer= TransactionSerializer(transaction)
         return Response(serializer.data,status=status.HTTP_200_OK)
-            

@@ -16,15 +16,14 @@ class AuthorAPIView(GenericAPIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class ViewAuthorsAPIView(GenericAPIView):
+class AuthorsAPIView(GenericAPIView):
     serializer_class= [ViewAuthorSerializer]
     def get(self,request):
         authors= Author.objects.all()
-        serializer_context= {'request':request}
-        serializer= ViewAuthorSerializer(authors,many=True,context=serializer_context)
+        serializer= ViewAuthorSerializer(authors,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class ViewAuthorAPIView(GenericAPIView):
+class AuthorDetailAPIView(GenericAPIView):
     serializer_class= [ViewAuthorSerializer]
     def get_object(self,pk):
         try:
@@ -34,6 +33,10 @@ class ViewAuthorAPIView(GenericAPIView):
 
     def get(self,request,pk):
         author= self.get_object(pk)
-        serializer_context= {'request':request}
-        serializer= ViewAuthorSerializer(author,context=serializer_context)
+        serializer= ViewAuthorSerializer(author)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+    def delete(self,request,pk):
+        author= self.get_object(pk)
+        author.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

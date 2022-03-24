@@ -1,6 +1,12 @@
+import uuid
 from django.db import models
 
 class BookItem(models.Model):
+    id= models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     book= models.ForeignKey(
         'books.Book',
         related_name='book_items',

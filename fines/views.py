@@ -53,7 +53,10 @@ class UpdatePatronFinesAPIView(GenericAPIView):
             )
             notification.save()
         
-        return Response({"message":"Library fines have been updated."},status=status.HTTP_200_OK)
+        return Response(
+            {"message":"Library fines have been updated."},
+            status=status.HTTP_200_OK
+        )
 
 class FineAPIView(GenericAPIView):
     serializer_class= FineSerializer
@@ -97,11 +100,20 @@ class PayFineAPIView(GenericAPIView):
         amount= request.data.get('amount')
 
         if amount < fine.amount:
-            return Response({"Fine":fine.amount,"Message":"Please pay the full amount"},status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "Fine":fine.amount,
+                    "Message":"Please pay the full amount"
+                },
+                status=status.HTTP_200_OK
+            )
         else:
             fine.paid_on= datetime.date.today()
             fine.save()
             library_card= LibraryCard.objects.get(student=fine.transaction.student)
             library_card.active= True
             library_card.save()
-            return Response({"Message":"Thank you for clearing your fine."},status=status.HTTP_200_OK)
+            return Response(
+                {"Message":"Thank you for clearing your fine."},
+                status=status.HTTP_200_OK
+            )

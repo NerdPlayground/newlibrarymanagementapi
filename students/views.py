@@ -11,7 +11,7 @@ from library_cards.models import LibraryCard
 from notifications.models import Notification
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from students.serializers import UpdateSerializer,StudentSerializer,CheckOutBookItemSerializer
+from students.serializers import UpdateSerializer,StudentSerializer,BookItemSerializer
 
 class UpdateAPIView(GenericAPIView):
     serializer_class= UpdateSerializer
@@ -48,14 +48,14 @@ class StudentDetailAPIView(GenericAPIView):
 
 class CheckOutBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= [CheckOutBookItemSerializer]
+    serializer_class= [BookItemSerializer]
 
     def post(self,request):
         if not request.user.is_staff:
             book_item= BookItem.objects.get(id=request.data.get("book_item"))
             student= Student.objects.get(user=request.user)
             due_date= datetime.date.today()+datetime.timedelta(days=5)
-            serializer= CheckOutBookItemSerializer(data=request.data)
+            serializer= BookItemSerializer(data=request.data)
 
             if serializer.is_valid():
                 if not book_item.reference:
@@ -114,7 +114,10 @@ class CheckOutBookItemAPIView(GenericAPIView):
                     )
 
             else:
-                return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         else:
             return Response(
                 {"Warning: Administrator Access Denied"},
@@ -123,90 +126,117 @@ class CheckOutBookItemAPIView(GenericAPIView):
 
 class ReturnBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
+    serializer_class= [BookItemSerializer]
+
     def post(self,request):
-        book_item= BookItem.objects.get(id=request.data.get('book_item'))
-        student= Student.objects.get(user=request.user)
-        message= "Book item successfully returned. Thank you for reading with us"
-        if student == book_item.loaned_to:
-            transaction= Transaction.objects.get(book_item=book_item,returned_at=None)
-            if transaction.due_date < datetime.date.today():
-                library_card= LibraryCard.objects.get(student=student)
-                library_card.active= False
-                library_card.save()
-                message= "Pay existing fine to actvate library card"
+        if not request.user.is_staff:
+            book_item= BookItem.objects.get(id=request.data.get('book_item'))
+            student= Student.objects.get(user=request.user)
+            message= "Book item successfully returned. Thank you for reading with us"
+            serializer= BookItemSerializer(data=request.data)
 
-            book_item.loaned_to= None
-            if book_item.reserved_by is not None:
-                name= book_item.book.name
-                notification= Notification.objects.create(
-                    student= book_item.reserved_by,
-                    title= "Reserved Book",
-                    message= name+" is available for checkout."
-                )
-                notification.save()
-            else:
-                book_item.status= "Available"
-            book_item.save()
-            transaction.returned_at= datetime.date.today()
-            transaction.save()
-            return Response({"message": message},status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"Warning":"Student loaned to and current user don't match"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if serializer.is_valid():
+                if student == book_item.loaned_to:
+                    transaction= Transaction.objects.get(book_item=book_item,returned_at=None)
+                    if transaction.due_date < datetime.date.today():
+                        library_card= LibraryCard.objects.get(student=student)
+                        library_card.active= False
+                        library_card.save()
+                        message= "Pay existing fine to actvate library card"
 
-class RenewBookItemAPIView(GenericAPIView):
-    def post(self,request):
-        book_item= BookItem.objects.get(id=request.data.get('book_item'))
-        student= Student.objects.get(user=request.user)
-        other_message= str()
-        message= "Book item successfully renewed. Thank you for reading with us."
-        
-        if student == book_item.loaned_to:
-            if book_item.status != "Reserved":
-                transaction= Transaction.objects.get(book_item=book_item,returned_at=None)
-                if transaction.due_date < datetime.date.today():
-                    library_card= LibraryCard.objects.get(student=student)
-                    library_card.active= False
-                    library_card.save()
-                    other_message= "Note: Pay existing fine to actvate library card."
-                transaction.due_date += datetime.timedelta(days=5)
-                transaction.save()
-
-                name= transaction.book_item.book.name
-                due_date= transaction.due_date
-                notification= Notification.objects.create(
-                    student= student,
-                    title= "Transaction Renewal",
-                    message= "You have renewed your transaction for" 
-                    +" book item ("+name +")"
-                    +". Ensure the book item is returned or"
-                    +" your transaction is renewed"
-                    +" before or on " +str(due_date)
-                    +" to avoid revocation of your library card."
-                )
-                notification.save()
-
-                return Response(
-                    {"Message":message +" " +other_message},
-                    status=status.HTTP_200_OK
-                )
+                    book_item.loaned_to= None
+                    if book_item.reserved_by is not None:
+                        name= book_item.book.name
+                        notification= Notification.objects.create(
+                            student= book_item.reserved_by,
+                            title= "Reserved Book",
+                            message= name+" is available for checkout."
+                        )
+                        notification.save()
+                    else:
+                        book_item.status= "Available"
+                    book_item.save()
+                    transaction.returned_at= datetime.date.today()
+                    transaction.save()
+                    return Response(
+                        {"message": message},
+                        status=status.HTTP_200_OK
+                    )
+                else:
+                    return Response(
+                        {"Warning":"Student loaned to and current user don't match"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
             else:
                 return Response(
-                    {"message":"This book item is resereved."},
+                    serializer.errors,
                     status=status.HTTP_400_BAD_REQUEST
                 )
         else:
             return Response(
-                {"Warning":"Student loaned to and current user don't match"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"Warning: Administrator Access Denied"},
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
-class ModifyTransactionAPIView(GenericAPIView):
-    def get(self,request):
-        transaction= Transaction.objects.get(id=20)
-        transaction.issued_at= datetime.date.today()-datetime.timedelta(days=8)
-        transaction.due_date= datetime.date.today()-datetime.timedelta(days=3)
-        transaction.save()
-        return Response(status=status.HTTP_200_OK)
+class RenewBookItemAPIView(GenericAPIView):
+    permission_classes= [IsAuthenticated]
+    serializer_class= [BookItemSerializer]
+
+    def post(self,request):
+        if not request.user.is_staff:
+            book_item= BookItem.objects.get(id=request.data.get('book_item'))
+            student= Student.objects.get(user=request.user)
+            other_message= str()
+            message= "Book item successfully renewed. Thank you for reading with us."
+            serializer= BookItemSerializer(data=request.data)
+
+            if serializer.is_valid():
+                if student == book_item.loaned_to:
+                    if book_item.status != "Reserved":
+                        transaction= Transaction.objects.get(book_item=book_item,returned_at=None)
+                        if transaction.due_date < datetime.date.today():
+                            library_card= LibraryCard.objects.get(student=student)
+                            library_card.active= False
+                            library_card.save()
+                            other_message= "Note: Pay existing fine to actvate library card."
+                        transaction.due_date += datetime.timedelta(days=5)
+                        transaction.save()
+
+                        name= transaction.book_item.book.name
+                        due_date= transaction.due_date
+                        notification= Notification.objects.create(
+                            student= student,
+                            title= "Transaction Renewal",
+                            message= "You have renewed your transaction for" 
+                            +" book item ("+name +")"
+                            +". Ensure the book item is returned or"
+                            +" your transaction is renewed"
+                            +" before or on " +str(due_date)
+                            +" to avoid revocation of your library card."
+                        )
+                        notification.save()
+
+                        return Response(
+                            {"Message":message +" " +other_message},
+                            status=status.HTTP_200_OK
+                        )
+                    else:
+                        return Response(
+                            {"message":"This book item is resereved."},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                else:
+                    return Response(
+                        {"Warning":"Student loaned to and current user don't match"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            return Response(
+                {"Warning: Administrator Access Denied"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )

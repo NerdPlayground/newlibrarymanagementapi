@@ -4,6 +4,6 @@ from fines.views import FineAPIView,FineDetailAPIView,UpdatePatronFinesAPIView,P
 urlpatterns= [
     path('all-fines/',FineAPIView.as_view(),name='all-fines'),
     path('my-fines/',FineDetailAPIView.as_view(),name='my-fines'),
-    path('pay-fine/<int:pk>/',PayFineAPIView.as_view(),name='pay-fine'),
+    path('pay-fine/<str:pk>/',PayFineAPIView.as_view(),name='pay-fine'),
     path('update-fines/',UpdatePatronFinesAPIView.as_view(),name='update-fines')
 ]
