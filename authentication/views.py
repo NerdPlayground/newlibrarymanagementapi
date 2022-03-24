@@ -14,7 +14,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 from authentication.serializers import (
     RegisterSerializer,LoginSerializer,UserSerializer,
-    RequestBookSerializer,IssueBookSerializer,PossessedBooksSerializer
+    RequestBookSerializer,IssueBookSerializer,
+    PossessedBooksSerializer,EditUserSerializer
 )
 
 class RegisterAPIView(GenericAPIView):
@@ -67,6 +68,43 @@ class UserAPIView(GenericAPIView):
         users= User.objects.all()
         serializer= UserSerializer(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class UserDetailAPIView(GenericAPIView):
+    permission_classes= [IsAuthenticated]
+    serializer_class= UserSerializer
+    def get(self,request):
+        user= request.user
+        serializer= UserSerializer(user)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+class EditUserAPIView(GenericAPIView):
+    permission_classes= [IsAuthenticated]
+    serializer_class= EditUserSerializer
+    def get_object(self,pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+    
+    def put(self,request,pk):
+        if not request.user.is_staff:
+            user= self.get_object(pk)
+            serializer= EditUserSerializer(user,data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                {"Warning":"Administrator access denied."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    def delete(self,request,pk):
+        user= self.get_object(pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class RequestBookAPIView(GenericAPIView):
     serializer_class= RequestBookSerializer
@@ -200,6 +238,6 @@ class DeleteDetailAPIView(GenericAPIView):
             raise Http404
     
     def delete(self,request,pk):
-        student= self.get_object(pk)
-        student.delete()
+        user= self.get_object(pk)
+        user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

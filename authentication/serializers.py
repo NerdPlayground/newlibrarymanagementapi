@@ -1,8 +1,7 @@
 from books.models import Book
 from rest_framework import serializers
 from transactions.models import Transaction
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.contrib.auth.models import User
 
 class RegisterSerializer(serializers.Serializer):
     first_name= serializers.CharField(max_length=150)
@@ -22,6 +21,11 @@ class UserSerializer(serializers.Serializer):
     last_name= serializers.CharField(max_length=150)
     username= serializers.CharField(max_length=150)
     email= serializers.EmailField(max_length=150)
+
+class EditUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= User
+        fields= ["first_name","last_name","email"]
 
 class RequestBookSerializer(serializers.ModelSerializer):
     class Meta:
