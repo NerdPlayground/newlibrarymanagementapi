@@ -26,19 +26,3 @@ class EditUserSerializer(serializers.ModelSerializer):
     class Meta:
         model= User
         fields= ["first_name","last_name","email"]
-
-class RequestBookSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= Transaction
-        fields= ["id","book"]
-
-class IssueBookSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= Transaction
-        fields= ["issued","issued_at","issued_by"]
-        read_only_fields=["issued_at","issued_by"]
-
-class PossessedBooksSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= Book
-        fields= ["category","id","name","author"]
