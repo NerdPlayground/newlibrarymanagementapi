@@ -9,7 +9,7 @@ from reservations.serializers import ReservationSerializer
 
 class PatronReservationsAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= [ReservationSerializer]
+    serializer_class= ReservationSerializer
     
     def get(self,request):
         if not request.user.is_staff:
@@ -24,8 +24,8 @@ class PatronReservationsAPIView(GenericAPIView):
             return Response({"Warning: Administrator Access Denied"},status=status.HTTP_401_UNAUTHORIZED)
 
 class CancelReservationAPIView(GenericAPIView):
-    serializer_class= [ReservationSerializer]
     permission_classes= [IsAuthenticated]
+    serializer_class= ReservationSerializer
 
     def get_object(self,pk):
         try:

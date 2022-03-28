@@ -6,7 +6,7 @@ from transactions.views import (
 )
 
 urlpatterns=[
-    path('transactions/',LibraryTransactionsAPIView.as_view(),name='user-transactions'),
-    path('transactions/user/',PatronTransactionsAPIView.as_view(),name='user-transactions'),
-    path('transactions/user/<str:pk>/',TransactionDetailAPIView.as_view(),name='user-transaction'),
+    path('library-transactions/',LibraryTransactionsAPIView.as_view(),name='library-transactions'),
+    path('patron-transactions/',PatronTransactionsAPIView.as_view(),name='patron-transactions'),
+    path('patron-transaction/<str:pk>/',TransactionDetailAPIView.as_view(),name='patron-transaction'),
 ]

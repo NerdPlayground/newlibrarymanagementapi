@@ -35,6 +35,14 @@ class AuthorDetailAPIView(GenericAPIView):
         author= self.get_object(pk)
         serializer= ViewAuthorSerializer(author)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
+class DeleteAuthorAPIView(GenericAPIView):
+    permission_classes= [IsAdminUser]
+    def get_object(self,pk):
+        try:
+            return Author.objects.get(pk=pk)
+        except Author.DoesNotExist:
+            raise Http404
     
     def delete(self,request,pk):
         author= self.get_object(pk)

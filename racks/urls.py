@@ -1,7 +1,7 @@
 from django.urls import path
-from racks.views import AddRackAPIView,ViewRackAPIView
+from racks.views import AddRackAPIView,ViewRacksAPIView
 
 urlpatterns= [
-    path('racks/',ViewRackAPIView.as_view(),name='rack'),
-    path('racks/add/',AddRackAPIView.as_view(),name='add-rack'),
+    path('racks/',ViewRacksAPIView.as_view(),name='racks'),
+    path('add-rack/',AddRackAPIView.as_view(),name='add-rack'),
 ]

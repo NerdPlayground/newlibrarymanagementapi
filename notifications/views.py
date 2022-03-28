@@ -9,7 +9,7 @@ from notifications.serializers import NotificationSerializer
 
 class NotificationsAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= [NotificationSerializer]
+    serializer_class= NotificationSerializer
     
     def get(self,request):
         if not request.user.is_staff:
@@ -22,7 +22,7 @@ class NotificationsAPIView(GenericAPIView):
 
 class NotificationDetailAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= [NotificationSerializer]
+    serializer_class= NotificationSerializer
 
     def get_object(self,pk):
         try:

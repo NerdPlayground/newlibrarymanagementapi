@@ -1,16 +1,18 @@
 from django.urls import path
 from authentication.views import (
-    RegisterAPIView,UserAPIView,
-    DeleteAPIView,UserDetailAPIView,EditUserAPIView
+    RegisterPatronAPIView,PatronsAPIView,
+    PatronDetailAPIView,EditPatronAPIView,
+    DeletePatronAPIView,DeleteAccountAPIView,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
 urlpatterns= [
-    path('register/',RegisterAPIView.as_view(),name='register'),
+    path('register/',RegisterPatronAPIView.as_view(),name='register'),
     path('login/',TokenObtainPairView.as_view(),name='login'),
-    path('login/refresh/',TokenRefreshView.as_view(),name='login'),
-    path('users/',UserAPIView.as_view(),name='users'),
-    path('user/',UserDetailAPIView.as_view(),name='user-detail'),
-    path('users/<int:pk>/',EditUserAPIView.as_view(),name='edit-users'),
-    path('delete/',DeleteAPIView.as_view(),name='delete'),
+    path('refresh-login/',TokenRefreshView.as_view(),name='login'),
+    path('patrons/',PatronsAPIView.as_view(),name='patrons'),
+    path('patron/',PatronDetailAPIView.as_view(),name='patron-detail'),
+    path('edit-patron/<int:pk>/',EditPatronAPIView.as_view(),name='edit-patrons'),
+    path('delete-account/',DeleteAccountAPIView.as_view(),name='delete'),
+    path('delete-patron/<int:pk>/',DeletePatronAPIView.as_view(),name='delete-patron'),
 ]

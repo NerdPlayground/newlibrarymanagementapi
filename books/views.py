@@ -11,6 +11,8 @@ from books.serializers import BookSerializer,ViewBookSerializer
 
 class AddBookAPIView(GenericAPIView):
     serializer_class= BookSerializer
+    permission_classes= [IsAdminUser]
+    
     def add_book_items(self,book,published_on,quantity,rack):
         while quantity != 0:
             BookItem.objects.create(
@@ -28,14 +30,26 @@ class AddBookAPIView(GenericAPIView):
         rack= request.data.get('rack')
 
         if quantity == None:
-            return Response({"quantity":["This field is required"]},status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"quantity":["This field is required"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         elif quantity < 1:
-            return Response({"quantity":["This field should be at least 1"]},status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"quantity":["This field should be at least 1"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         if rack == None:
-            return Response({"rack":["This field is required"]},status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"rack":["This field is required"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         elif rack == "":
-            return Response({"rack":["This field should have a valid identifier"]},status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"rack":["This field should have a valid identifier"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         serializer= BookSerializer(data=request.data)
         if serializer.is_valid():
@@ -48,6 +62,13 @@ class AddBookAPIView(GenericAPIView):
             )
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class ViewBooksAPIView(GenericAPIView):
+    serializer_class= ViewBookSerializer
+    def get(self,request):
+        categories= Book.objects.all()
+        serializer= ViewBookSerializer(categories,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 class ViewBookAPIView(GenericAPIView):
     serializer_class= ViewBookSerializer
@@ -62,15 +83,10 @@ class ViewBookAPIView(GenericAPIView):
         serializer= ViewBookSerializer(book)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class ViewBooksAPIView(GenericAPIView):
-    serializer_class= ViewBookSerializer
-    def get(self,request):
-        categories= Book.objects.all()
-        serializer= ViewBookSerializer(categories,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-
 class EditBookAPIView(GenericAPIView):
     serializer_class= BookSerializer
+    permission_classes= [IsAdminUser]
+
     def get_object(self,pk):
         try:
             return Book.objects.get(pk=pk)

@@ -4,11 +4,11 @@ from django.http import Http404
 from rest_framework import status
 from students.models import Student
 from transactions.models import Transaction
-from fines.serializers import FineSerializer
 from rest_framework.response import Response
 from library_cards.models import LibraryCard
 from notifications.models import Notification
 from rest_framework.generics import GenericAPIView
+from fines.serializers import FineSerializer,PayFineSerializer
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 
 class UpdatePatronFinesAPIView(GenericAPIView):
@@ -58,9 +58,10 @@ class UpdatePatronFinesAPIView(GenericAPIView):
             status=status.HTTP_200_OK
         )
 
-class FineAPIView(GenericAPIView):
+class FinesAPIView(GenericAPIView):
     serializer_class= FineSerializer
     permission_classes= [IsAdminUser]
+
     def get(self,request):
         fines= Fine.objects.all()
         serializer= FineSerializer(fines,many=True)
@@ -89,6 +90,8 @@ class FineDetailAPIView(GenericAPIView):
 
 class PayFineAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
+    serializer_class= PayFineSerializer
+
     def get_object(self,pk):
         try:
             return Fine.objects.get(pk=pk)
@@ -98,22 +101,25 @@ class PayFineAPIView(GenericAPIView):
     def post(self,request,pk):
         fine= self.get_object(pk=pk)
         amount= request.data.get('amount')
-
-        if amount < fine.amount:
-            return Response(
-                {
-                    "Fine":fine.amount,
-                    "Message":"Please pay the full amount"
-                },
-                status=status.HTTP_200_OK
-            )
+        serializer= PayFineSerializer(amount)
+        if serializer.is_valid():
+            if amount < fine.amount:
+                return Response(
+                    {
+                        "Fine":fine.amount,
+                        "Message":"Please pay the full amount"
+                    },
+                    status=status.HTTP_200_OK
+                )
+            else:
+                fine.paid_on= datetime.date.today()
+                fine.save()
+                library_card= LibraryCard.objects.get(student=fine.transaction.student)
+                library_card.active= True
+                library_card.save()
+                return Response(
+                    {"Message":"Thank you for clearing your fine."},
+                    status=status.HTTP_200_OK
+                )
         else:
-            fine.paid_on= datetime.date.today()
-            fine.save()
-            library_card= LibraryCard.objects.get(student=fine.transaction.student)
-            library_card.active= True
-            library_card.save()
-            return Response(
-                {"Message":"Thank you for clearing your fine."},
-                status=status.HTTP_200_OK
-            )
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

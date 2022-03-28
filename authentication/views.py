@@ -12,12 +12,12 @@ from rest_framework.response import Response
 from library_cards.models import LibraryCard
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
-from authentication.serializers import RegisterSerializer,UserSerializer,EditUserSerializer
+from authentication.serializers import RegisterPatronSerializer,PatronSerializer,EditPatronSerializer
 
-class RegisterAPIView(GenericAPIView):
-    serializer_class= RegisterSerializer
+class RegisterPatronAPIView(GenericAPIView):
+    serializer_class= RegisterPatronSerializer
     def post(self,request):
-        serializer= RegisterSerializer(data=request.data)
+        serializer= RegisterPatronSerializer(data=request.data)
         if serializer.is_valid():
             user = User.objects.create_user(
                 first_name= request.data.get('first_name'),
@@ -45,25 +45,26 @@ class RegisterAPIView(GenericAPIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class UserAPIView(GenericAPIView):
+class PatronsAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
-    serializer_class= UserSerializer
+    serializer_class= PatronSerializer
     def get(self,request):
         users= User.objects.all()
-        serializer= UserSerializer(users,many=True)
+        serializer= PatronSerializer(users,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class UserDetailAPIView(GenericAPIView):
+class PatronDetailAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= UserSerializer
+    serializer_class= PatronSerializer
     def get(self,request):
         user= request.user
-        serializer= UserSerializer(user)
+        serializer= PatronSerializer(user)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class EditUserAPIView(GenericAPIView):
+class EditPatronAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= EditUserSerializer
+    serializer_class= EditPatronSerializer
+
     def get_object(self,pk):
         try:
             return User.objects.get(pk=pk)
@@ -73,7 +74,7 @@ class EditUserAPIView(GenericAPIView):
     def put(self,request,pk):
         if not request.user.is_staff:
             user= self.get_object(pk)
-            serializer= EditUserSerializer(user,data=request.data)
+            serializer= EditPatronSerializer(user,data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data,status=status.HTTP_200_OK)
@@ -83,15 +84,25 @@ class EditUserAPIView(GenericAPIView):
                 {"Warning":"Administrator access denied."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
-    def delete(self,request,pk):
-        user= self.get_object(pk)
+
+class DeleteAccountAPIView(GenericAPIView):
+    permission_classes= [IsAuthenticated]
+
+    def delete(self,request):
+        user= request.user
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class DeleteAPIView(GenericAPIView):
-    permission_classes= [IsAuthenticated]
-    def delete(self,request):
-        user= request.user
+class DeletePatronAPIView(GenericAPIView):
+    permission_classes= [IsAdminUser]
+
+    def get_object(self,pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+    
+    def delete(self,request,pk):
+        user= self.get_object(pk)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -9,12 +9,20 @@ from categories.serializers import CategorySerializer,ViewCategorySerializer
 class AddCategoryAPIView(GenericAPIView):
     serializer_class= CategorySerializer
     permission_classes = [IsAdminUser]
+
     def post(self,request):
         serializer= CategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class ViewCategoriesAPIView(GenericAPIView):
+    serializer_class= ViewCategorySerializer
+    def get(self,request):
+        categories= Category.objects.all()
+        serializer= ViewCategorySerializer(categories,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 class ViewCategoryAPIView(GenericAPIView):
     serializer_class= ViewCategorySerializer
@@ -29,16 +37,10 @@ class ViewCategoryAPIView(GenericAPIView):
         serializer= ViewCategorySerializer(category)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
-class ViewCategoriesAPIView(GenericAPIView):
-    serializer_class= ViewCategorySerializer
-    def get(self,request):
-        categories= Category.objects.all()
-        serializer= ViewCategorySerializer(categories,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-
-class EditCategoriesAPIView(GenericAPIView):
+class EditCategoryAPIView(GenericAPIView):
     serializer_class= CategorySerializer
     permission_classes = [IsAdminUser]
+
     def get_object(self,pk):
         try:
             return Category.objects.get(pk=pk)

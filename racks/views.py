@@ -8,6 +8,7 @@ from racks.serializers import AddRackSerializer,ViewRackSerializer
 class AddRackAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     serializer_class= AddRackSerializer
+
     def post(self,request):
         serializer= AddRackSerializer(data=request.data)
         if serializer.is_valid():
@@ -15,8 +16,9 @@ class AddRackAPIView(GenericAPIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-class ViewRackAPIView(GenericAPIView):
+class ViewRacksAPIView(GenericAPIView):
     serializer_class= ViewRackSerializer
+
     def get(self,request):
         racks= Rack.objects.all()
         serializer= ViewRackSerializer(racks,many=True)
