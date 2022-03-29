@@ -33,3 +33,6 @@ class BookItem(models.Model):
         related_name='book_items',
         on_delete=models.DO_NOTHING
     )
+
+    def __str__(self):
+        return self.book.name

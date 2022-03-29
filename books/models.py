@@ -26,3 +26,6 @@ class Book(models.Model):
     publisher= models.CharField(max_length=255)
     language= models.CharField(max_length=255)
     pages= models.IntegerField()
+
+    def __str__(self):
+        return self.name

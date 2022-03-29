@@ -15,3 +15,6 @@ class Fine(models.Model):
     )
     amount= models.IntegerField()
     paid_on= models.DateField(null=True,blank=True)
+
+    def __str__(self):
+        return str(self.transaction)

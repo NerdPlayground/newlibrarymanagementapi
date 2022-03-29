@@ -14,3 +14,6 @@ class LibraryCard(models.Model):
     )
     issued_at= models.DateField(auto_now_add=True)
     active= models.BooleanField()
+
+    def __str__(self):
+        return self.student.user.username

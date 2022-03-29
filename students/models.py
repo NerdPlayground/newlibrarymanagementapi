@@ -24,3 +24,6 @@ class Student(models.Model):
     faculty= models.CharField(max_length=255,blank=True)
     course= models.CharField(max_length=255,blank=True)
     mode_of_study= models.CharField(max_length=255,blank=True)
+
+    def __str__(self):
+        return self.first_name+" "+self.last_name

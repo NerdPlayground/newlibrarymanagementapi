@@ -22,3 +22,6 @@ class Reservation(models.Model):
         default='Pending',
         max_length=255
     )
+    
+    def __str__(self):
+        return self.student.user.username+" - "+self.book_item.book.name

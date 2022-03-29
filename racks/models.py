@@ -11,3 +11,9 @@ class Rack(models.Model):
     segment= models.CharField(max_length=255)
     position= models.CharField(max_length=255)
     rack_number= models.IntegerField()
+
+    def __str__(self):
+        floor,segment,position= str(self.floor),self.segment,self.position
+        superscript= "st" if int(floor) == 1 else "nd" if int(floor) == 2 else "rd" if int(floor) == 3 else "th"
+        rack_details= floor+superscript+" Floor, "+segment+" Segment, "+position+" Position"
+        return rack_details

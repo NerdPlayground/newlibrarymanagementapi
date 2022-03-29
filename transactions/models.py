@@ -20,3 +20,6 @@ class Transaction(models.Model):
     issued_at= models.DateField(auto_now_add=True)
     due_date= models.DateField()
     returned_at= models.DateField(null=True,blank=True)
+
+    def __str__(self):
+        return self.student.user.username+" - "+self.book_item.book.name
