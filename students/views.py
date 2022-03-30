@@ -53,6 +53,25 @@ class CheckOutBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     serializer_class= BookItemSerializer
 
+    def checkout(self,student,book_item,due_date,available):
+        book_item.status= "Loaned"
+        book_item.loaned_to= student
+        if not available:
+            book_item.reserved_by= None
+        book_item.save()
+
+        name= book_item.book.name
+        notification= Notification.objects.create(
+            student= student,
+            title= "Book Lending",
+            message= "You have checked out " +name
+            +". Ensure the book item is returned or"
+            +" your transaction is renewed"
+            +" before or on " +str(due_date)
+            +" to avoid revocation of your library card."
+        )
+        notification.save()
+
     def post(self,request):
         if not request.user.is_staff:
             book_item= BookItem.objects.get(id=request.data.get("book_item"))
@@ -63,27 +82,15 @@ class CheckOutBookItemAPIView(GenericAPIView):
             if serializer.is_valid():
                 if not book_item.reference:
                     if book_item.status == "Available":
+                        self.checkout(student,book_item,due_date,True)
                         serializer.save(
                             student= student,
                             due_date= due_date
                         )
-                        book_item.status= "Loaned"
-                        book_item.loaned_to= student
-                        book_item.save()
-
-                        name= book_item.book.name
-                        notification= Notification.objects.create(
-                            student= student,
-                            title= "Book Lending",
-                            message= "You have checked out " +name
-                            +". Ensure the book item is returned or"
-                            +" your transaction is renewed"
-                            +" before or on " +str(due_date)
-                            +" to avoid revocation of your library card."
+                        return Response(
+                            serializer.data,
+                            status=status.HTTP_201_CREATED
                         )
-                        notification.save()
-
-                        return Response(serializer.data,status=status.HTTP_201_CREATED)
 
                     elif book_item.status == "Loaned":
                         Reservation.objects.create(
@@ -105,11 +112,24 @@ class CheckOutBookItemAPIView(GenericAPIView):
                             },
                             status=status.HTTP_400_BAD_REQUEST
                         )
+                    
                     elif book_item.status == "Reserved":
-                        return Response(
-                            {"message":"This Book Item is Resereved"},
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
+                        if book_item.reserved_by == student:
+                            self.checkout(student,book_item,due_date,False)
+                            serializer.save(
+                                student= student,
+                                due_date= due_date
+                            )
+                            return Response(
+                                serializer.data,
+                                status=status.HTTP_201_CREATED
+                            )
+                        else:
+                            return Response(
+                                {"message":"This Book Item is Resereved"},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    
                 else:
                     return Response(
                         {"message":"This is a Reference Book Item"},
@@ -243,3 +263,18 @@ class RenewBookItemAPIView(GenericAPIView):
                 {"Warning: Administrator Access Denied"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+
+
+'''
+{
+    "id": "54d88da5-62f2-4e84-b2b3-8d185f213c42",
+    "book": "5fc641c4-455a-4653-8b11-c0d4f3a0cc07",
+    "reference": false,
+    "loaned_to": null, ===> change reserver
+    "reserved_by": "1df5724c-e8c3-486b-abfd-3c85b7749344", ===> change to null
+    "status": "Reserved", ===> change to Loaned
+    "purchased_on": "2022-03-24",
+    "published_on": "2020-01-01",
+    "rack": "bd673d55-5cf8-4016-8cdd-b3c313acaef2"
+}
+'''
