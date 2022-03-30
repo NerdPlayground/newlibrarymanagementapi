@@ -1,3 +1,4 @@
+from books.models import Book
 from django.http import Http404
 from rest_framework import status
 from book_items.models import BookItem
@@ -21,9 +22,16 @@ class BookItemsAPIView(GenericAPIView):
     serializer= BookItemSerializer
 
     def get(self,request):
-        book_items= BookItem.objects.all()
-        serializer= BookItemSerializer(book_items,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        book_id= request.data.get('book_id')
+        if book_id == None or book_id == "":
+            return Response(
+                {"book_id":["This field is required"]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            book_items= BookItem.objects.filter(book=book_id)
+            serializer= BookItemSerializer(book_items,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
 
 class BookItemDetailAPIView(GenericAPIView):
     serializer_class= BookItemSerializer
