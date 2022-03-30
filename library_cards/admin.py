@@ -5,4 +5,4 @@ from library_cards.models import LibraryCard
 class LibraryCardAdmin(admin.ModelAdmin):
     list_display= ["id","student","issued_at","active"]
     list_filter= ["active"]
-    readonly_fields= ["student","issued_at","active"]
+    readonly_fields= ["student","issued_at"]

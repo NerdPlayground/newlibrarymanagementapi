@@ -1,16 +1,12 @@
 import datetime
-from fines.models import Fine
-from books.models import Book
 from django.http import Http404
 from rest_framework import status
 from students.models import Student
-from django.db.models.query import QuerySet
-from transactions.models import Transaction
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from library_cards.models import LibraryCard
 from rest_framework.generics import GenericAPIView
+from library_cards.card_status import verify_patron
 from rest_framework.permissions import IsAdminUser,IsAuthenticated
 from authentication.serializers import RegisterPatronSerializer,PatronSerializer,EditPatronSerializer
 
@@ -56,6 +52,7 @@ class RegisterPatronAPIView(GenericAPIView):
 class PatronsAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
     serializer_class= PatronSerializer
+
     def get(self,request):
         users= User.objects.all()
         serializer= PatronSerializer(users,many=True)
@@ -64,10 +61,14 @@ class PatronsAPIView(GenericAPIView):
 class PatronDetailAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     serializer_class= PatronSerializer
+
     def get(self,request):
-        user= request.user
-        serializer= PatronSerializer(user)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        if verify_patron(request=request):
+            user= request.user
+            serializer= PatronSerializer(user)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"Library card has been revoked"},status=status.HTTP_400_BAD_REQUEST)
 
 class EditPatronAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
@@ -81,12 +82,18 @@ class EditPatronAPIView(GenericAPIView):
     
     def put(self,request,pk):
         if not request.user.is_staff:
-            user= self.get_object(pk)
-            serializer= EditPatronSerializer(user,data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data,status=status.HTTP_200_OK)
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            if verify_patron(request=request):
+                user= self.get_object(pk)
+                serializer= EditPatronSerializer(user,data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data,status=status.HTTP_200_OK)
+                return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(
+                    {"message":"Library card has been revoked"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         else:
             return Response(
                 {"Warning":"Administrator access denied."},
@@ -97,9 +104,15 @@ class DeleteAccountAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
 
     def delete(self,request):
-        user= request.user
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if verify_patron(request=request):
+            user= request.user
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                    {"message":"Library card has been revoked"},
+                    status=status.HTTP_400_BAD_REQUEST
+            )
 
 class DeletePatronAPIView(GenericAPIView):
     permission_classes= [IsAdminUser]
