@@ -19,19 +19,27 @@ class RegisterPatronAPIView(GenericAPIView):
     def post(self,request):
         serializer= RegisterPatronSerializer(data=request.data)
         if serializer.is_valid():
+            first_name= request.data.get('first_name')
+            last_name= request.data.get('last_name')
+            registration_number= request.data.get('registration_number')
+            username= "reader_"+registration_number[:2]+registration_number[3:]
+            email= request.data.get('email')
+            password= request.data.get('password')
+
             user = User.objects.create_user(
-                first_name= request.data.get('first_name'),
-                last_name= request.data.get('last_name'),
-                username= request.data.get('username'),
-                email= request.data.get('email')
+                first_name= first_name,
+                last_name= last_name,
+                username= username,
+                email= email,
             )
-            user.set_password(request.data.get('password'))
+            user.set_password(password)
             user.save()
             
             student= Student.objects.create(
                 user= user,
                 first_name= user.first_name,
-                last_name= user.last_name
+                last_name= user.last_name,
+                registration_number= registration_number
             )
             student.save()
 

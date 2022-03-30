@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class RegisterPatronSerializer(serializers.Serializer):
     first_name= serializers.CharField(max_length=150)
     last_name= serializers.CharField(max_length=150)
-    username= serializers.CharField(max_length=150)
+    registration_number= serializers.CharField(max_length=150)
     email= serializers.EmailField(max_length=150)
     password= serializers.CharField(min_length=8,max_length=20,write_only=True)
 
