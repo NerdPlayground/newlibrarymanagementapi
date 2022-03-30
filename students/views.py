@@ -93,25 +93,25 @@ class CheckOutBookItemAPIView(GenericAPIView):
                         )
 
                     elif book_item.status == "Loaned":
-                        Reservation.objects.create(
-                            student= student,
-                            book_item= book_item
-                        )
+                        if book_item.loaned_to != student:
+                            Reservation.objects.create(
+                                student= student,
+                                book_item= book_item
+                            )
 
-                        book_item.status = "Reserved"
-                        book_item.reserved_by= student
-                        book_item.save()
+                            book_item.status = "Reserved"
+                            book_item.reserved_by= student
+                            book_item.save()
 
-                        return Response(
-                            {
-                                "message":
-                                [
-                                    "This book item is loaned",
-                                    "This book item has been added to your reservations"
-                                ]
-                            },
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
+                            return Response(
+                                {"message":"This book item is loaned and it has been added to your reservations"},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                        else:
+                            return Response(
+                                {"message":"Student loaned to and current user match"},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
                     
                     elif book_item.status == "Reserved":
                         if book_item.reserved_by == student:
