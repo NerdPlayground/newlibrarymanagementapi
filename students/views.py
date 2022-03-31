@@ -50,12 +50,13 @@ class StudentsAPIView(GenericAPIView):
 class StudentDetailAPIView(GenericAPIView):
     serializer_class= StudentSerializer
     permission_classes= [IsAuthenticated]
-
+    
     def get(self,request):
         if not request.user.is_staff:
             if verify_patron(request=request):
                 student= Student.objects.get(user=request.user)
                 serializer= StudentSerializer(student)
+                self.books_checked_out(student=student)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             else:
                 return Response(
@@ -71,6 +72,10 @@ class StudentDetailAPIView(GenericAPIView):
 class CheckOutBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
     serializer_class= BookItemSerializer
+
+    def book_items_checked_out(self,student):
+        book_items= BookItem.objects.filter(loaned_to=student)
+        return len(book_items)
 
     def checkout(self,student,book_item,due_date,available):
         book_item.status= "Loaned"
@@ -102,15 +107,18 @@ class CheckOutBookItemAPIView(GenericAPIView):
                 if serializer.is_valid():
                     if not book_item.reference:
                         if book_item.status == "Available":
-                            self.checkout(student,book_item,due_date,True)
-                            serializer.save(
-                                student= student,
-                                due_date= due_date
-                            )
-                            return Response(
-                                serializer.data,
-                                status=status.HTTP_201_CREATED
-                            )
+                            if self.book_items_checked_out(student=student) < 5:
+                                self.checkout(student,book_item,due_date,True)
+                                serializer.save(
+                                    student= student,
+                                    due_date= due_date
+                                )
+                                return Response(serializer.data,status=status.HTTP_201_CREATED)
+                            else:
+                                return Response(
+                                    {"message":"Can't check out more than five book items"},
+                                    status=status.HTTP_400_BAD_REQUEST
+                                )
 
                         elif book_item.status == "Loaned":
                             if book_item.loaned_to != student:
