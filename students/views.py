@@ -148,6 +148,15 @@ class CheckOutBookItemAPIView(GenericAPIView):
                                     student= student,
                                     due_date= due_date
                                 )
+                                
+                                reservation= Reservation.objects.get(
+                                    student= student,
+                                    book_item= book_item,
+                                    status= "Pending"
+                                )
+                                reservation.status = "Completed"
+                                reservation.save()
+
                                 return Response(
                                     serializer.data,
                                     status=status.HTTP_201_CREATED
