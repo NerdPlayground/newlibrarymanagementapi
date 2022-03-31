@@ -8,3 +8,4 @@ class BookItemSerializer(serializers.ModelSerializer):
             "id","book","reference","loaned_to","reserved_by",
             "status","purchased_on","published_on","rack"
         ]
+        read_only_fields = ["purchased_on"]

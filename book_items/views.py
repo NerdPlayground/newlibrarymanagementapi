@@ -1,3 +1,4 @@
+import datetime
 from books.models import Book
 from django.http import Http404
 from rest_framework import status
@@ -14,7 +15,7 @@ class AddBookItemAPIView(GenericAPIView):
     def post(self,request):
         serializer= BookItemSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(purchased_on= datetime.date.today())
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
