@@ -1,7 +1,7 @@
 from books.models import Book
 from rest_framework import serializers
 from transactions.models import Transaction
-from django.contrib.auth.models import User
+from authentication.models import User
 
 class RegisterPatronSerializer(serializers.Serializer):
     first_name= serializers.CharField(max_length=150)

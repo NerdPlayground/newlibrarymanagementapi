@@ -18,7 +18,9 @@ class Transaction(models.Model):
         on_delete=models.DO_NOTHING
     )
     issued_at= models.DateField(auto_now_add=True)
-    due_date= models.DateField()
+    overdue= models.BooleanField(default=False)
+    due_date= models.DateField(null=True,blank=True)
+    returned= models.BooleanField(default=False)
     returned_at= models.DateField(null=True,blank=True)
 
     def __str__(self):

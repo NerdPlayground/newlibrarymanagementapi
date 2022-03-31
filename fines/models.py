@@ -14,6 +14,8 @@ class Fine(models.Model):
         on_delete=models.DO_NOTHING
     )
     amount= models.IntegerField()
+    last_updated= models.DateField(null=True,blank=True)
+    paid= models.BooleanField(default=False)
     paid_on= models.DateField(null=True,blank=True)
 
     def __str__(self):

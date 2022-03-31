@@ -22,9 +22,12 @@ class UpdatePatronFinesAPIView(GenericAPIView):
         try:
             return (Fine.objects.get(transaction=loaned_book),True,)
         except Fine.DoesNotExist:
+            loaned_book.overdue= True
+            loaned_book.save()
             fine= Fine.objects.create(
                 transaction= loaned_book,
                 amount= amount,
+                last_updated= datetime.date.today()
             )
             return (fine,False,)
 
@@ -40,6 +43,7 @@ class UpdatePatronFinesAPIView(GenericAPIView):
             if retrieved_fine[1]:
                 fine= retrieved_fine[0]
                 fine.amount= amount
+                fine.last_updated= datetime.date.today()
                 fine.save()
             
             notification= Notification.objects.create(
@@ -112,6 +116,7 @@ class PayFineAPIView(GenericAPIView):
                     status=status.HTTP_200_OK
                 )
             else:
+                fine.paid= True
                 fine.paid_on= datetime.date.today()
                 fine.save()
                 library_card= LibraryCard.objects.get(student=fine.transaction.student)

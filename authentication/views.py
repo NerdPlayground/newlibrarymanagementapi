@@ -2,7 +2,7 @@ import datetime
 from django.http import Http404
 from rest_framework import status
 from students.models import Student
-from django.contrib.auth.models import User
+from authentication.models import User
 from rest_framework.response import Response
 from library_cards.models import LibraryCard
 from rest_framework.generics import GenericAPIView

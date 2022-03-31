@@ -223,6 +223,7 @@ class ReturnBookItemAPIView(GenericAPIView):
                         else:
                             book_item.status= "Available"
                         book_item.save()
+                        transaction.returned= True
                         transaction.returned_at= datetime.date.today()
                         transaction.save()
                         return Response(

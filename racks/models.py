@@ -10,7 +10,7 @@ class Rack(models.Model):
     floor= models.IntegerField()
     segment= models.CharField(max_length=255)
     position= models.CharField(max_length=255)
-    rack_number= models.IntegerField()
+    rack_number= models.IntegerField(unique=True)
 
     def __str__(self):
         floor,segment,position= str(self.floor),self.segment,self.position

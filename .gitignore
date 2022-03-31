@@ -154,5 +154,7 @@ cython_debug/
 #.idea/
 
 dump.rdb
-commands.txt
+sketchpad.txt
 v4_uuids.txt
+load_database.json
+dump_database.json

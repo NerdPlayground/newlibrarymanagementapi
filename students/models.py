@@ -1,6 +1,6 @@
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
+from authentication.models import User
 
 class Student(models.Model):
     id= models.UUIDField(
@@ -9,7 +9,7 @@ class Student(models.Model):
         editable=False
     )
     user= models.OneToOneField(
-        'auth.User',
+        'authentication.User',
         related_name='student',
         on_delete=models.CASCADE
     )
