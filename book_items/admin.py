@@ -11,5 +11,5 @@ class BookItemAdmin(admin.ModelAdmin):
     list_filter= ["book","reference","status"]
     readonly_fields= [
         "loaned_to","reserved_by",
-        "status","published_on","rack"
+        "status"
     ]
