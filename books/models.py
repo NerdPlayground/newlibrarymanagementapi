@@ -8,7 +8,7 @@ class Book(models.Model):
         editable=False
     )
     isbn= models.CharField(
-        max_length=13,
+        max_length=17,
         unique=True
     )
     category= models.ForeignKey(

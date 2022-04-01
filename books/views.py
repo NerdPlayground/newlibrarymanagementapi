@@ -98,6 +98,10 @@ class EditBookAPIView(GenericAPIView):
         serializer= BookSerializer(book,data=request.data)
         if serializer.is_valid():
             serializer.save()
+            book_items= BookItem.objects.filter(book=book)
+            for book_item in book_items:
+                book_item.published_on= book.published_on
+                book_item.save()
             return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
