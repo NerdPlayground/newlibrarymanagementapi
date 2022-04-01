@@ -11,7 +11,7 @@ class RegisterPatronSerializer(serializers.Serializer):
     password= serializers.CharField(min_length=8,max_length=20,write_only=True)
 
 class PatronSerializer(serializers.Serializer):
-    id= serializers.IntegerField(read_only=True)
+    id= serializers.CharField(read_only=True)
     first_name= serializers.CharField(max_length=150)
     last_name= serializers.CharField(max_length=150)
     username= serializers.CharField(max_length=150)

@@ -12,7 +12,7 @@ urlpatterns= [
     path('refresh-login/',TokenRefreshView.as_view(),name='login'),
     path('patrons/',PatronsAPIView.as_view(),name='patrons'),
     path('patron/',PatronDetailAPIView.as_view(),name='patron-detail'),
-    path('edit-patron/<int:pk>/',EditPatronAPIView.as_view(),name='edit-patrons'),
+    path('edit-patron/<str:pk>/',EditPatronAPIView.as_view(),name='edit-patrons'),
     path('delete-account/',DeleteAccountAPIView.as_view(),name='delete'),
-    path('delete-patron/<int:pk>/',DeletePatronAPIView.as_view(),name='delete-patron'),
+    path('delete-patron/<str:pk>/',DeletePatronAPIView.as_view(),name='delete-patron'),
 ]

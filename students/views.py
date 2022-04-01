@@ -56,7 +56,6 @@ class StudentDetailAPIView(GenericAPIView):
             if verify_patron(request=request):
                 student= Student.objects.get(user=request.user)
                 serializer= StudentSerializer(student)
-                self.books_checked_out(student=student)
                 return Response(serializer.data,status=status.HTTP_200_OK)
             else:
                 return Response(
