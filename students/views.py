@@ -12,7 +12,7 @@ from notifications.models import Notification
 from rest_framework.generics import GenericAPIView
 from library_cards.card_status import verify_patron
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from students.serializers import UpdateSerializer,StudentSerializer,BookItemSerializer
+from students.serializers import UpdateSerializer,StudentSerializer,PatronActivitiesSerializer
 
 class UpdateAPIView(GenericAPIView):
     serializer_class= UpdateSerializer
@@ -70,7 +70,7 @@ class StudentDetailAPIView(GenericAPIView):
 
 class CheckOutBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= BookItemSerializer
+    serializer_class= PatronActivitiesSerializer
 
     def book_items_checked_out(self,student):
         book_items= BookItem.objects.filter(loaned_to=student)
@@ -101,7 +101,7 @@ class CheckOutBookItemAPIView(GenericAPIView):
                 book_item= BookItem.objects.get(id=request.data.get("book_item"))
                 student= Student.objects.get(user=request.user)
                 due_date= datetime.date.today()+datetime.timedelta(days=5)
-                serializer= BookItemSerializer(data=request.data)
+                serializer= PatronActivitiesSerializer(data=request.data)
 
                 if serializer.is_valid():
                     if not book_item.reference:
@@ -191,7 +191,7 @@ class CheckOutBookItemAPIView(GenericAPIView):
 
 class ReturnBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= BookItemSerializer
+    serializer_class= PatronActivitiesSerializer
 
     def post(self,request):
         if not request.user.is_staff:
@@ -199,7 +199,7 @@ class ReturnBookItemAPIView(GenericAPIView):
                 book_item= BookItem.objects.get(id=request.data.get('book_item'))
                 student= Student.objects.get(user=request.user)
                 message= "Book item successfully returned. Thank you for reading with us"
-                serializer= BookItemSerializer(data=request.data)
+                serializer= PatronActivitiesSerializer(data=request.data)
 
                 if serializer.is_valid():
                     if student == book_item.loaned_to:
@@ -252,7 +252,7 @@ class ReturnBookItemAPIView(GenericAPIView):
 
 class RenewBookItemAPIView(GenericAPIView):
     permission_classes= [IsAuthenticated]
-    serializer_class= BookItemSerializer
+    serializer_class= PatronActivitiesSerializer
 
     def post(self,request):
         if not request.user.is_staff:
@@ -261,7 +261,7 @@ class RenewBookItemAPIView(GenericAPIView):
                 student= Student.objects.get(user=request.user)
                 other_message= str()
                 message= "Book item successfully renewed. Thank you for reading with us."
-                serializer= BookItemSerializer(data=request.data)
+                serializer= PatronActivitiesSerializer(data=request.data)
 
                 if serializer.is_valid():
                     if student == book_item.loaned_to:
