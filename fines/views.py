@@ -105,26 +105,38 @@ class PayFineAPIView(GenericAPIView):
     def post(self,request,pk):
         fine= self.get_object(pk=pk)
         amount= request.data.get('amount')
-        serializer= PayFineSerializer(amount)
+        serializer= PayFineSerializer(data={'amount':amount})
         if serializer.is_valid():
-            if amount < fine.amount:
-                return Response(
-                    {
-                        "Fine":fine.amount,
-                        "Message":"Please pay the full amount"
-                    },
-                    status=status.HTTP_200_OK
-                )
+            if not fine.paid:
+                if fine.last_updated == datetime.date.today():
+                    if amount < fine.amount:
+                        return Response(
+                            {
+                                "Fine":fine.amount,
+                                "Message":"Please pay the full amount"
+                            },
+                            status=status.HTTP_200_OK
+                        )
+                    else:
+                        fine.paid= True
+                        fine.paid_on= datetime.date.today()
+                        fine.save()
+                        library_card= LibraryCard.objects.get(student=fine.transaction.student)
+                        library_card.active= True
+                        library_card.save()
+                        return Response(
+                            {"Message":"Thank you for clearing your fine."},
+                            status=status.HTTP_200_OK
+                        )
+                else:
+                    return Response(
+                        {"message":"Update the patron fine before payment."},
+                        status= status.HTTP_400_BAD_REQUEST
+                    )
             else:
-                fine.paid= True
-                fine.paid_on= datetime.date.today()
-                fine.save()
-                library_card= LibraryCard.objects.get(student=fine.transaction.student)
-                library_card.active= True
-                library_card.save()
                 return Response(
-                    {"Message":"Thank you for clearing your fine."},
-                    status=status.HTTP_200_OK
+                    {"message":"Patron fine has been paid."},
+                    status= status.HTTP_400_BAD_REQUEST
                 )
         else:
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
